@@ -29,6 +29,10 @@ public record AlertSettings
     // Rapid change alerts
     public bool RapidChangeAlerts { get; init; } = true;
 
+    // Rate of change alerts (individual)
+    public bool RisingAlerts { get; init; } = false;
+    public bool FallingAlerts { get; init; } = false;
+
     // Sound preferences
     public bool UseCustomSounds { get; init; } = false;
 
@@ -79,6 +83,8 @@ public record AlertSettings
         bool? urgentHighEnabled = null,
         int? urgentHighThreshold = null,
         bool? rapidChangeAlerts = null,
+        bool? risingAlerts = null,
+        bool? fallingAlerts = null,
         bool? useCustomSounds = null,
         int? snoozeDuration = null,
         bool? repeatAlerts = null,
@@ -98,6 +104,8 @@ public record AlertSettings
             UrgentHighEnabled = urgentHighEnabled ?? UrgentHighEnabled,
             UrgentHighThreshold = urgentHighThreshold ?? UrgentHighThreshold,
             RapidChangeAlerts = rapidChangeAlerts ?? RapidChangeAlerts,
+            RisingAlerts = risingAlerts ?? RisingAlerts,
+            FallingAlerts = fallingAlerts ?? FallingAlerts,
             UseCustomSounds = useCustomSounds ?? UseCustomSounds,
             SnoozeDuration = snoozeDuration ?? SnoozeDuration,
             RepeatAlerts = repeatAlerts ?? RepeatAlerts,

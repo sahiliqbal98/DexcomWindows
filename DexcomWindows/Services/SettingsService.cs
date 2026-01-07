@@ -229,6 +229,7 @@ public enum ColorTheme
 /// </summary>
 public enum TimeRange
 {
+    OneHour,
     ThreeHours,
     SixHours,
     TwelveHours,
@@ -239,6 +240,7 @@ public static class TimeRangeExtensions
 {
     public static string DisplayName(this TimeRange range) => range switch
     {
+        TimeRange.OneHour => "1 Hour",
         TimeRange.ThreeHours => "3 Hours",
         TimeRange.SixHours => "6 Hours",
         TimeRange.TwelveHours => "12 Hours",
@@ -248,6 +250,7 @@ public static class TimeRangeExtensions
 
     public static string ShortName(this TimeRange range) => range switch
     {
+        TimeRange.OneHour => "1h",
         TimeRange.ThreeHours => "3h",
         TimeRange.SixHours => "6h",
         TimeRange.TwelveHours => "12h",
@@ -257,6 +260,7 @@ public static class TimeRangeExtensions
 
     public static double Seconds(this TimeRange range) => range switch
     {
+        TimeRange.OneHour => 1 * 3600,
         TimeRange.ThreeHours => 3 * 3600,
         TimeRange.SixHours => 6 * 3600,
         TimeRange.TwelveHours => 12 * 3600,
@@ -266,6 +270,7 @@ public static class TimeRangeExtensions
 
     public static int Minutes(this TimeRange range) => range switch
     {
+        TimeRange.OneHour => 60,
         TimeRange.ThreeHours => 180,
         TimeRange.SixHours => 360,
         TimeRange.TwelveHours => 720,
