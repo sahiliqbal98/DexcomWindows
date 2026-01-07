@@ -2,7 +2,7 @@ name: Build Windows App
 
 on:
   push:
-    branches: [main]
+    branches: [main, ui-overhaul-v2]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -17,22 +17,19 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '9.0.x'
 
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v2
 
       - name: Restore dependencies
-        run: dotnet restore DexcomWindows/DexcomWindows.csproj -p:Platform=x64
+        run: dotnet restore DexcomWindows/DexcomWindows.csproj /p:Platform=x64
 
-      - name: Build with msbuild
-        run: msbuild DexcomWindows/DexcomWindows.csproj /p:Configuration=Release /p:Platform=x64 /p:RuntimeIdentifier=win-x64
-
-      - name: Publish
-        run: dotnet publish DexcomWindows/DexcomWindows.csproj -c Release -r win-x64 --self-contained true -p:Platform=x64 -p:PublishSingleFile=false -o ./publish
+      - name: Build
+        run: dotnet build DexcomWindows/DexcomWindows.csproj -c Release -p:Platform=x64
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: DexcomWindows-x64
-          path: ./publish/
+          path: DexcomWindows/bin/x64/Release/
