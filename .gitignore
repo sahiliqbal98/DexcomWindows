@@ -1,0 +1,34 @@
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Bb]in/
+[Oo]bj/
+publish/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# NuGet
+*.nupkg
+packages/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Windows App SDK
+*.msix
+*.appx
+*.appxbundle
+*.appxupload
+
+# Rider
+.idea/
+
+# macOS
+.DS_Store

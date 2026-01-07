@@ -1,0 +1,321 @@
+<Window
+    x:Class="DexcomWindows.Views.SettingsWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="Dexcom Settings">
+
+    <Grid>
+        <NavigationView x:Name="SettingsNav"
+                        IsBackButtonVisible="Collapsed"
+                        IsSettingsVisible="False"
+                        PaneDisplayMode="Top"
+                        SelectionChanged="SettingsNav_SelectionChanged">
+            <NavigationView.MenuItems>
+                <NavigationViewItem Content="General" Tag="General">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE713;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Alerts" Tag="Alerts">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xEA8F;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="About" Tag="About">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE946;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.MenuItems>
+
+            <ScrollViewer>
+                <StackPanel Padding="24" Spacing="16">
+
+                    <!-- General Settings -->
+                    <StackPanel x:Name="GeneralPanel" Spacing="16">
+                        <!-- Account Section -->
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Account" Style="{StaticResource SubtitleTextBlockStyle}"/>
+
+                            <Grid Padding="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                  CornerRadius="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel>
+                                    <TextBlock x:Name="AccountStatusText" Text="Signed in"/>
+                                    <TextBlock x:Name="ServerText" Text="United States"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                               FontSize="12"/>
+                                </StackPanel>
+
+                                <Button Grid.Column="1" Content="Sign Out" Click="SignOutButton_Click"/>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Appearance Section -->
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Appearance" Style="{StaticResource SubtitleTextBlockStyle}"/>
+
+                            <Grid Padding="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                  CornerRadius="8">
+                                <StackPanel Spacing="12">
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="Color Theme"/>
+                                        <ComboBox x:Name="ThemeComboBox"
+                                                  HorizontalAlignment="Stretch"
+                                                  SelectionChanged="ThemeComboBox_SelectionChanged">
+                                            <ComboBoxItem Content="System Default" Tag="System"/>
+                                            <ComboBoxItem Content="Light" Tag="Light"/>
+                                            <ComboBoxItem Content="Dark" Tag="Dark"/>
+                                            <ComboBoxItem Content="Charcoal" Tag="Charcoal"/>
+                                            <ComboBoxItem Content="Rainbow" Tag="Rainbow"/>
+                                            <ComboBoxItem Content="Dexcom Green" Tag="DexcomGreen"/>
+                                        </ComboBox>
+                                    </StackPanel>
+
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="Timer Bar Style"/>
+                                        <ComboBox x:Name="TimerBarComboBox"
+                                                  HorizontalAlignment="Stretch"
+                                                  SelectionChanged="TimerBarComboBox_SelectionChanged">
+                                            <ComboBoxItem Content="Fill as time passes (Elapsed)" Tag="Elapsed"/>
+                                            <ComboBoxItem Content="Empty as update approaches (Remaining)" Tag="Remaining"/>
+                                        </ComboBox>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Target Range Section -->
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Target Range" Style="{StaticResource SubtitleTextBlockStyle}"/>
+
+                            <Grid Padding="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                  CornerRadius="8">
+                                <StackPanel Spacing="16">
+                                    <StackPanel Spacing="4">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <TextBlock Text="Low Target:"/>
+                                            <TextBlock x:Name="TargetLowValue" Text="80" FontWeight="SemiBold"/>
+                                            <TextBlock Text="mg/dL"/>
+                                        </StackPanel>
+                                        <Slider x:Name="TargetLowSlider"
+                                                Minimum="60" Maximum="100"
+                                                Value="80"
+                                                ValueChanged="TargetLowSlider_ValueChanged"/>
+                                    </StackPanel>
+
+                                    <StackPanel Spacing="4">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <TextBlock Text="High Target:"/>
+                                            <TextBlock x:Name="TargetHighValue" Text="160" FontWeight="SemiBold"/>
+                                            <TextBlock Text="mg/dL"/>
+                                        </StackPanel>
+                                        <Slider x:Name="TargetHighSlider"
+                                                Minimum="120" Maximum="200"
+                                                Value="160"
+                                                ValueChanged="TargetHighSlider_ValueChanged"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Startup Section -->
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Startup" Style="{StaticResource SubtitleTextBlockStyle}"/>
+
+                            <Grid Padding="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                  CornerRadius="8">
+                                <ToggleSwitch x:Name="StartupToggle"
+                                              Header="Start with Windows"
+                                              Toggled="StartupToggle_Toggled"/>
+                            </Grid>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Alerts Settings -->
+                    <StackPanel x:Name="AlertsPanel" Spacing="16" Visibility="Collapsed">
+                        <!-- Master Toggle -->
+                        <Grid Padding="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                              CornerRadius="8">
+                            <ToggleSwitch x:Name="AlertsEnabledToggle"
+                                          Header="Enable Alerts"
+                                          Toggled="AlertsEnabledToggle_Toggled"/>
+                        </Grid>
+
+                        <!-- Notification Style -->
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Notification Style" Style="{StaticResource SubtitleTextBlockStyle}"/>
+
+                            <Grid Padding="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                  CornerRadius="8">
+                                <StackPanel Spacing="8">
+                                    <CheckBox x:Name="ShowBannersCheck" Content="Show banner notifications"
+                                              Checked="NotificationStyle_Changed" Unchecked="NotificationStyle_Changed"/>
+                                    <CheckBox x:Name="PlaySoundCheck" Content="Play sound"
+                                              Checked="NotificationStyle_Changed" Unchecked="NotificationStyle_Changed"/>
+                                    <Button Content="Send Test Notification" Click="TestNotification_Click"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Low Alerts -->
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Low Glucose Alerts" Style="{StaticResource SubtitleTextBlockStyle}"/>
+
+                            <Grid Padding="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                  CornerRadius="8">
+                                <StackPanel Spacing="12">
+                                    <ToggleSwitch x:Name="UrgentLowToggle"
+                                                  Toggled="AlertToggle_Changed">
+                                        <ToggleSwitch.Header>
+                                            <StackPanel>
+                                                <TextBlock Text="Urgent Low Alert"/>
+                                                <TextBlock x:Name="UrgentLowThresholdText" Text="Below 55 mg/dL"
+                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                           FontSize="12"/>
+                                            </StackPanel>
+                                        </ToggleSwitch.Header>
+                                    </ToggleSwitch>
+
+                                    <ToggleSwitch x:Name="LowToggle"
+                                                  Toggled="AlertToggle_Changed">
+                                        <ToggleSwitch.Header>
+                                            <StackPanel>
+                                                <TextBlock Text="Low Alert"/>
+                                                <TextBlock x:Name="LowThresholdText" Text="Below 70 mg/dL"
+                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                           FontSize="12"/>
+                                            </StackPanel>
+                                        </ToggleSwitch.Header>
+                                    </ToggleSwitch>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- High Alerts -->
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="High Glucose Alerts" Style="{StaticResource SubtitleTextBlockStyle}"/>
+
+                            <Grid Padding="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                  CornerRadius="8">
+                                <StackPanel Spacing="12">
+                                    <ToggleSwitch x:Name="HighToggle"
+                                                  Toggled="AlertToggle_Changed">
+                                        <ToggleSwitch.Header>
+                                            <StackPanel>
+                                                <TextBlock Text="High Alert"/>
+                                                <TextBlock x:Name="HighThresholdText" Text="Above 180 mg/dL"
+                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                           FontSize="12"/>
+                                            </StackPanel>
+                                        </ToggleSwitch.Header>
+                                    </ToggleSwitch>
+
+                                    <ToggleSwitch x:Name="UrgentHighToggle"
+                                                  Toggled="AlertToggle_Changed">
+                                        <ToggleSwitch.Header>
+                                            <StackPanel>
+                                                <TextBlock Text="Urgent High Alert"/>
+                                                <TextBlock x:Name="UrgentHighThresholdText" Text="Above 250 mg/dL"
+                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                           FontSize="12"/>
+                                            </StackPanel>
+                                        </ToggleSwitch.Header>
+                                    </ToggleSwitch>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Other Alerts -->
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Other Alerts" Style="{StaticResource SubtitleTextBlockStyle}"/>
+
+                            <Grid Padding="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                  CornerRadius="8">
+                                <StackPanel Spacing="12">
+                                    <ToggleSwitch x:Name="RapidChangeToggle"
+                                                  Header="Rapid change alerts (⇈ or ⇊)"
+                                                  Toggled="AlertToggle_Changed"/>
+
+                                    <ToggleSwitch x:Name="StaleDataToggle"
+                                                  Toggled="AlertToggle_Changed">
+                                        <ToggleSwitch.Header>
+                                            <StackPanel>
+                                                <TextBlock Text="Stale data alert"/>
+                                                <TextBlock x:Name="StaleDataThresholdText"
+                                                           Text="No new data for 15+ minutes"
+                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                           FontSize="12"/>
+                                            </StackPanel>
+                                        </ToggleSwitch.Header>
+                                    </ToggleSwitch>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Reset Button -->
+                        <Button Content="Reset Alerts to Defaults"
+                                HorizontalAlignment="Center"
+                                Click="ResetAlerts_Click"/>
+                    </StackPanel>
+
+                    <!-- About Panel -->
+                    <StackPanel x:Name="AboutPanel" Spacing="16" Visibility="Collapsed">
+                        <StackPanel HorizontalAlignment="Center" Spacing="8">
+                            <TextBlock Text="Dexcom Windows"
+                                       FontSize="24"
+                                       FontWeight="SemiBold"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="Version 1.0.0"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       HorizontalAlignment="Center"/>
+                        </StackPanel>
+
+                        <TextBlock Text="A Windows system tray app for monitoring Dexcom glucose readings."
+                                   TextWrapping="Wrap"
+                                   TextAlignment="Center"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Features" Style="{StaticResource SubtitleTextBlockStyle}"/>
+
+                            <Grid Padding="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                  CornerRadius="8">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Text="• Real-time glucose monitoring in system tray"/>
+                                    <TextBlock Text="• Interactive glucose chart with time ranges"/>
+                                    <TextBlock Text="• Smart refresh timing synced to Dexcom"/>
+                                    <TextBlock Text="• Customizable alerts and notifications"/>
+                                    <TextBlock Text="• Multiple color themes"/>
+                                    <TextBlock Text="• Statistics (average, std dev, time in range)"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Disclaimer" Style="{StaticResource SubtitleTextBlockStyle}"/>
+
+                            <Grid Padding="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                  CornerRadius="8">
+                                <TextBlock TextWrapping="Wrap"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                                    This app is not affiliated with or endorsed by Dexcom, Inc.
+                                    The information displayed is for informational purposes only
+                                    and should not be used to make treatment decisions.
+                                    Always consult your healthcare provider for medical advice.
+                                </TextBlock>
+                            </Grid>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+        </NavigationView>
+    </Grid>
+</Window>

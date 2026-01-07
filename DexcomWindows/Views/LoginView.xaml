@@ -1,0 +1,149 @@
+<UserControl
+    x:Class="DexcomWindows.Views.LoginView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Padding="24" MaxWidth="400">
+        <StackPanel Spacing="16">
+            <!-- Header -->
+            <StackPanel Spacing="8" HorizontalAlignment="Center">
+                <TextBlock Text="Dexcom"
+                           FontSize="28"
+                           FontWeight="SemiBold"
+                           HorizontalAlignment="Center"/>
+                <TextBlock Text="Sign in to view your glucose data"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
+
+            <!-- Important Note -->
+            <InfoBar x:Name="FollowerWarning"
+                     IsOpen="True"
+                     IsClosable="False"
+                     Severity="Warning"
+                     Title="Important"
+                     Message="Dexcom Share requires at least one follower who has ACCEPTED your invitation. The follower can be yourself using a different email address."/>
+
+            <!-- Server Selection -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="Region" FontWeight="SemiBold"/>
+                <ComboBox x:Name="ServerComboBox"
+                          HorizontalAlignment="Stretch"
+                          SelectedIndex="0">
+                    <ComboBoxItem Content="United States" Tag="US"/>
+                    <ComboBoxItem Content="Outside US (International)" Tag="International"/>
+                </ComboBox>
+            </StackPanel>
+
+            <!-- Login Method Toggle -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="Login Method" FontWeight="SemiBold"/>
+                <RadioButtons x:Name="LoginMethodRadio" SelectedIndex="0">
+                    <RadioButton Content="Username / Email" Tag="Username"/>
+                    <RadioButton Content="Account ID" Tag="AccountId"/>
+                </RadioButtons>
+            </StackPanel>
+
+            <!-- Username/Email Input -->
+            <StackPanel x:Name="UsernamePanel" Spacing="4">
+                <TextBlock Text="Username or Email" FontWeight="SemiBold"/>
+                <TextBox x:Name="UsernameTextBox"
+                         PlaceholderText="Enter your Dexcom username or email"/>
+            </StackPanel>
+
+            <!-- Account ID Input (hidden by default) -->
+            <StackPanel x:Name="AccountIdPanel" Spacing="4" Visibility="Collapsed">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Text="Account ID" FontWeight="SemiBold"/>
+                    <HyperlinkButton Content="What's this?"
+                                     Click="AccountIdHelp_Click"
+                                     Padding="0"/>
+                </StackPanel>
+                <TextBox x:Name="AccountIdTextBox"
+                         PlaceholderText="Enter your 32-character Account ID"/>
+            </StackPanel>
+
+            <!-- Password Input -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="Password" FontWeight="SemiBold"/>
+                <PasswordBox x:Name="PasswordBox"
+                             PlaceholderText="Enter your Dexcom password"/>
+            </StackPanel>
+
+            <!-- Error Message -->
+            <InfoBar x:Name="ErrorInfoBar"
+                     IsOpen="False"
+                     Severity="Error"
+                     Title="Error"/>
+
+            <!-- Login Button -->
+            <Button x:Name="LoginButton"
+                    Content="Sign In"
+                    Style="{StaticResource AccentButtonStyle}"
+                    HorizontalAlignment="Stretch"
+                    Click="LoginButton_Click"/>
+
+            <!-- Loading Indicator -->
+            <ProgressRing x:Name="LoadingRing"
+                          IsActive="False"
+                          Visibility="Collapsed"
+                          HorizontalAlignment="Center"/>
+
+            <!-- Help Section -->
+            <Expander Header="Setup Help" HorizontalAlignment="Stretch">
+                <StackPanel Spacing="8" Padding="8">
+                    <TextBlock TextWrapping="Wrap">
+                        <Run FontWeight="SemiBold">How to enable Dexcom Share:</Run>
+                    </TextBlock>
+                    <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                        1. Open the Dexcom G7 app on your phone
+                    </TextBlock>
+                    <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                        2. Go to Settings → Share
+                    </TextBlock>
+                    <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                        3. Turn Share ON
+                    </TextBlock>
+                    <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                        4. Add a follower (can be yourself with a different email)
+                    </TextBlock>
+                    <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                        5. The follower must ACCEPT the invite and set up Dexcom Follow
+                    </TextBlock>
+                    <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                        6. Wait a few minutes, then sign in here
+                    </TextBlock>
+                </StackPanel>
+            </Expander>
+
+            <!-- Troubleshooting Section -->
+            <Expander Header="Troubleshooting" HorizontalAlignment="Stretch">
+                <StackPanel Spacing="8" Padding="8">
+                    <TextBlock TextWrapping="Wrap" FontWeight="SemiBold">
+                        "Share not configured" error:
+                    </TextBlock>
+                    <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                        Make sure your follower has ACCEPTED the invitation and finished setting up the Dexcom Follow app.
+                    </TextBlock>
+
+                    <TextBlock TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,8,0,0">
+                        "Invalid credentials" error:
+                    </TextBlock>
+                    <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                        Try using your Account ID instead of username. You can find it in the Dexcom app under Settings → Account.
+                    </TextBlock>
+
+                    <TextBlock TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,8,0,0">
+                        Phone number login:
+                    </TextBlock>
+                    <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                        Include the country code (e.g., +1 for US numbers).
+                    </TextBlock>
+                </StackPanel>
+            </Expander>
+        </StackPanel>
+    </Grid>
+</UserControl>
