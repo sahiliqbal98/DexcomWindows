@@ -1,6 +1,8 @@
 using DexcomWindows.Models;
 using Microsoft.Windows.AppNotifications;
 using Microsoft.Windows.AppNotifications.Builder;
+using System.Drawing;
+using System.Drawing.Drawing2D;
 
 namespace DexcomWindows.Services;
 
@@ -10,6 +12,7 @@ namespace DexcomWindows.Services;
 public class NotificationService
 {
     private readonly Dictionary<AlertType, DateTime> _cooldowns = new();
+    private readonly string _iconFolder;
 
     // Cooldown intervals (matching Mac app)
     private TimeSpan _alertCooldown = TimeSpan.FromMinutes(15);
@@ -32,6 +35,11 @@ public class NotificationService
 
     public NotificationService()
     {
+        // Create folder for notification icons
+        var appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        _iconFolder = Path.Combine(appData, "DexcomWindows", "NotificationIcons");
+        Directory.CreateDirectory(_iconFolder);
+
         try
         {
             // Initialize notification manager
@@ -42,6 +50,74 @@ public class NotificationService
         {
             System.Diagnostics.Debug.WriteLine($"Failed to initialize notifications: {ex.Message}");
         }
+    }
+
+    /// <summary>
+    /// Create a colored notification icon with the glucose value
+    /// </summary>
+    private Uri? CreateNotificationIcon(int value, Color color)
+    {
+        try
+        {
+            const int size = 64;
+            using var bitmap = new Bitmap(size, size, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            using var g = Graphics.FromImage(bitmap);
+
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.Clear(Color.Transparent);
+
+            // Draw colored circle
+            using var brush = new SolidBrush(color);
+            g.FillEllipse(brush, 2, 2, size - 4, size - 4);
+
+            // Draw value text
+            var fontSize = value.ToString().Length switch
+            {
+                1 => 32f,
+                2 => 28f,
+                3 => 22f,
+                _ => 18f
+            };
+
+            using var font = new Font("Arial", fontSize, FontStyle.Bold, GraphicsUnit.Pixel);
+            using var whiteBrush = new SolidBrush(Color.White);
+            using var format = new StringFormat
+            {
+                Alignment = StringAlignment.Center,
+                LineAlignment = StringAlignment.Center
+            };
+
+            g.DrawString(value.ToString(), font, whiteBrush, new RectangleF(0, 0, size, size), format);
+
+            // Save to file
+            var fileName = $"glucose_{value}_{color.ToArgb():X8}.png";
+            var filePath = Path.Combine(_iconFolder, fileName);
+            bitmap.Save(filePath, System.Drawing.Imaging.ImageFormat.Png);
+
+            return new Uri(filePath);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to create notification icon: {ex.Message}");
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Get color for alert type
+    /// </summary>
+    private static Color GetAlertColor(AlertType type)
+    {
+        return type switch
+        {
+            AlertType.UrgentLow => Color.FromArgb(255, 59, 48),   // Red
+            AlertType.Low => Color.FromArgb(255, 69, 58),         // Red
+            AlertType.UrgentHigh => Color.FromArgb(255, 59, 48),  // Red
+            AlertType.High => Color.FromArgb(255, 149, 0),        // Orange
+            AlertType.RapidChange => Color.FromArgb(255, 149, 0), // Orange
+            AlertType.StaleData => Color.FromArgb(128, 128, 128), // Gray
+            _ => Color.FromArgb(52, 199, 89)                      // Green
+        };
     }
 
     /// <summary>
@@ -168,6 +244,13 @@ public class NotificationService
             .AddText("Take action immediately!")
             .SetScenario(AppNotificationScenario.Urgent);
 
+        // Add custom icon
+        var iconUri = CreateNotificationIcon(value, GetAlertColor(AlertType.UrgentLow));
+        if (iconUri != null)
+        {
+            builder.SetAppLogoOverride(iconUri, AppNotificationImageCrop.Circle);
+        }
+
         if (PlaySound)
         {
             builder.SetAudioUri(new Uri("ms-winsoundevent:Notification.Looping.Alarm"));
@@ -194,6 +277,13 @@ public class NotificationService
             .AddText("Consider taking action.")
             .SetScenario(AppNotificationScenario.Urgent);
 
+        // Add custom icon
+        var iconUri = CreateNotificationIcon(value, GetAlertColor(AlertType.UrgentHigh));
+        if (iconUri != null)
+        {
+            builder.SetAppLogoOverride(iconUri, AppNotificationImageCrop.Circle);
+        }
+
         if (PlaySound)
         {
             builder.SetAudioUri(new Uri("ms-winsoundevent:Notification.Looping.Alarm"));
@@ -219,6 +309,13 @@ public class NotificationService
             .AddText($"{value} mg/dL")
             .AddText("Your glucose is below target range.");
 
+        // Add custom icon
+        var iconUri = CreateNotificationIcon(value, GetAlertColor(AlertType.Low));
+        if (iconUri != null)
+        {
+            builder.SetAppLogoOverride(iconUri, AppNotificationImageCrop.Circle);
+        }
+
         if (PlaySound)
         {
             builder.SetAudioUri(new Uri("ms-winsoundevent:Notification.Default"));
@@ -236,6 +333,13 @@ public class NotificationService
             .AddText($"High Glucose {trend.Symbol()}")
             .AddText($"{value} mg/dL")
             .AddText("Your glucose is above target range.");
+
+        // Add custom icon
+        var iconUri = CreateNotificationIcon(value, GetAlertColor(AlertType.High));
+        if (iconUri != null)
+        {
+            builder.SetAppLogoOverride(iconUri, AppNotificationImageCrop.Circle);
+        }
 
         if (PlaySound)
         {
@@ -262,6 +366,13 @@ public class NotificationService
             .AddText(title)
             .AddText($"{value} mg/dL")
             .AddText(body);
+
+        // Add custom icon
+        var iconUri = CreateNotificationIcon(value, GetAlertColor(AlertType.RapidChange));
+        if (iconUri != null)
+        {
+            builder.SetAppLogoOverride(iconUri, AppNotificationImageCrop.Circle);
+        }
 
         if (PlaySound)
         {

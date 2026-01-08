@@ -24,11 +24,13 @@ public static class WindowHelper
     private const int WS_SYSMENU = 0x00080000;
     private const int WS_EX_TOOLWINDOW = 0x00000080;
     private const int WS_EX_NOACTIVATE = 0x08000000;
+    private const int WS_EX_LAYERED = 0x00080000;
     private const uint SWP_FRAMECHANGED = 0x0020;
     private const uint SWP_NOMOVE = 0x0002;
     private const uint SWP_NOSIZE = 0x0001;
     private const uint SWP_NOZORDER = 0x0004;
     private const int DWMWA_WINDOW_CORNER_PREFERENCE = 33;
+    private const int LWA_ALPHA = 0x00000002;
 
     // DWM corner preference values
     private const int DWMWCP_DEFAULT = 0;
@@ -47,6 +49,9 @@ public static class WindowHelper
 
     [DllImport("dwmapi.dll")]
     private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
+
+    [DllImport("user32.dll")]
+    private static extern bool SetLayeredWindowAttributes(IntPtr hwnd, uint crKey, byte bAlpha, uint dwFlags);
 
     [DllImport("user32.dll")]
     private static extern bool GetCursorPos(out POINT lpPoint);
@@ -268,5 +273,26 @@ public static class WindowHelper
     public static IntPtr GetHandle(Window window)
     {
         return WindowNative.GetWindowHandle(window);
+    }
+
+    /// <summary>
+    /// Make window a layered window (required for SetWindowOpacity)
+    /// </summary>
+    public static void MakeLayered(Window window)
+    {
+        var hwnd = WindowNative.GetWindowHandle(window);
+        int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+        exStyle |= WS_EX_LAYERED;
+        SetWindowLong(hwnd, GWL_EXSTYLE, exStyle);
+    }
+
+    /// <summary>
+    /// Set window opacity (0-255, where 255 is fully opaque)
+    /// Window must be layered first (call MakeLayered)
+    /// </summary>
+    public static void SetWindowOpacity(Window window, byte opacity)
+    {
+        var hwnd = WindowNative.GetWindowHandle(window);
+        SetLayeredWindowAttributes(hwnd, 0, opacity, LWA_ALPHA);
     }
 }

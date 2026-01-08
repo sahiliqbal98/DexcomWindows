@@ -24,7 +24,6 @@ public sealed partial class TrayPopupView : UserControl
     private DispatcherTimer? _uiUpdateTimer;
     private TimeRange _selectedTimeRange = TimeRange.ThreeHours;
 
-    private const double SettingsPanelWidth = 400;
 
     public TrayPopupView()
     {
@@ -47,18 +46,31 @@ public sealed partial class TrayPopupView : UserControl
             ThemeService.Instance.SetTheme(settings.ColorTheme);
             this.RequestedTheme = ThemeService.Instance.GetElementTheme();
 
-            // Initial UI update
+            // Initial UI update - these are instant, use cached data from viewModel
             UpdateAuthenticationState();
+            ApplyThemeColors();
             UpdateTimeRangeSelection();
             UpdateUI();
-            UpdateTimerBar();
             UpdateAlertButton();
+            UpdateLoadingState(); // Ensure spinner is hidden if not loading
             LoadSettingsValues();
+            UpdateLastUpdatedTime();
+
+            _isInitialized = true;
 
             // Start UI update timer for progress bar and times
             StartUIUpdateTimer();
 
-            _isInitialized = true;
+            // Defer chart rendering slightly so popup appears instantly
+            // Chart is heavier to render, but data is already in memory
+            DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
+            {
+                if (_isInitialized)
+                {
+                    UpdateChart();
+                    UpdateTimerBar();
+                }
+            });
         }
         catch (Exception ex)
         {
@@ -104,34 +116,34 @@ public sealed partial class TrayPopupView : UserControl
                 if (!_isInitialized) return;
 
                 try
-                {
-                    switch (e.PropertyName)
-                    {
-                        case nameof(GlucoseViewModel.CurrentReading):
-                        case nameof(GlucoseViewModel.Readings):
-                        case nameof(GlucoseViewModel.Statistics):
-                            UpdateUI();
-                            UpdateChart();
-                            break;
-                        case nameof(GlucoseViewModel.IsAuthenticated):
-                            UpdateAuthenticationState();
-                            break;
-                        case nameof(GlucoseViewModel.IsLoading):
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(GlucoseViewModel.CurrentReading):
+                case nameof(GlucoseViewModel.Readings):
+                case nameof(GlucoseViewModel.Statistics):
+                    UpdateUI();
+                    UpdateChart();
+                    break;
+                case nameof(GlucoseViewModel.IsAuthenticated):
+                    UpdateAuthenticationState();
+                    break;
+                case nameof(GlucoseViewModel.IsLoading):
                             UpdateLoadingState();
-                            break;
-                        case nameof(GlucoseViewModel.Error):
-                            UpdateError();
-                            break;
+                    break;
+                case nameof(GlucoseViewModel.Error):
+                    UpdateError();
+                    break;
                         case nameof(GlucoseViewModel.LastRefreshTime):
                             UpdateLastUpdatedTime();
-                            break;
+                    break;
                     }
                 }
                 catch (Exception ex)
                 {
                     System.Diagnostics.Debug.WriteLine($"PropertyChanged handler error: {ex.Message}");
-                }
-            });
+            }
+        });
         }
         catch (Exception ex)
         {
@@ -142,12 +154,12 @@ public sealed partial class TrayPopupView : UserControl
     private void UpdateAuthenticationState()
     {
         try
-        {
-            if (_viewModel == null) return;
+    {
+        if (_viewModel == null) return;
 
-            var isAuthenticated = _viewModel.IsAuthenticated;
+        var isAuthenticated = _viewModel.IsAuthenticated;
             LoginPanel.Visibility = isAuthenticated ? Visibility.Collapsed : Visibility.Visible;
-            MainContent.Visibility = isAuthenticated ? Visibility.Visible : Visibility.Collapsed;
+        MainContent.Visibility = isAuthenticated ? Visibility.Visible : Visibility.Collapsed;
 
             // Notify parent about auth state change
             AuthStateChanged?.Invoke(this, isAuthenticated);
@@ -168,30 +180,30 @@ public sealed partial class TrayPopupView : UserControl
     private void UpdateUI()
     {
         try
+    {
+        if (_viewModel == null) return;
+
+        var reading = _viewModel.CurrentReading;
+
+        if (reading != null)
         {
-            if (_viewModel == null) return;
+            GlucoseValueText.Text = reading.Value.ToString();
+            TrendArrowText.Text = reading.Trend.Symbol();
+            TrendDescriptionText.Text = reading.Trend.Description();
 
-            var reading = _viewModel.CurrentReading;
-
-            if (reading != null)
-            {
-                GlucoseValueText.Text = reading.Value.ToString();
-                TrendArrowText.Text = reading.Trend.Symbol();
-                TrendDescriptionText.Text = reading.Trend.Description();
-
-                var color = ColorThemes.GetGlucoseColor(reading.ColorCategory);
+            var color = ColorThemes.GetGlucoseColor(reading.ColorCategory);
                 GlucoseValueText.Foreground = new SolidColorBrush(color);
                 TrendArrowText.Foreground = new SolidColorBrush(color);
                 HeaderGradientStart.Color = Color.FromArgb(48, color.R, color.G, color.B);
 
                 UpdateTimeAgo();
-            }
-            else
-            {
-                GlucoseValueText.Text = "--";
-                TrendArrowText.Text = "";
+        }
+        else
+        {
+            GlucoseValueText.Text = "--";
+            TrendArrowText.Text = "";
                 TrendDescriptionText.Text = "";
-                TimeAgoText.Text = "";
+            TimeAgoText.Text = "";
                 StaleWarningIcon.Visibility = Visibility.Collapsed;
                 HeaderGradientStart.Color = Color.FromArgb(48, 128, 128, 128);
             }
@@ -224,7 +236,7 @@ public sealed partial class TrayPopupView : UserControl
                 StaleWarningIcon.Visibility = Visibility.Collapsed;
                 TimeAgoText.Foreground = (SolidColorBrush)Resources["TextFillColorSecondaryBrush"]
                     ?? new SolidColorBrush(Colors.Gray);
-            }
+        }
         }
         catch { }
     }
@@ -234,18 +246,18 @@ public sealed partial class TrayPopupView : UserControl
         try
         {
             var stats = _viewModel?.Statistics;
-            if (stats != null)
-            {
-                AverageText.Text = stats.Average.ToString();
-                StdDevText.Text = stats.FormattedStandardDeviation;
-                TimeInRangeText.Text = stats.FormattedTimeInRange;
-            }
-            else
-            {
-                AverageText.Text = "--";
-                StdDevText.Text = "--";
+        if (stats != null)
+        {
+            AverageText.Text = stats.Average.ToString();
+            StdDevText.Text = stats.FormattedStandardDeviation;
+            TimeInRangeText.Text = stats.FormattedTimeInRange;
+        }
+        else
+        {
+            AverageText.Text = "--";
+            StdDevText.Text = "--";
                 TimeInRangeText.Text = "--%";
-            }
+        }
         }
         catch { }
     }
@@ -277,7 +289,7 @@ public sealed partial class TrayPopupView : UserControl
 
             var containerWidth = ((Border)ProgressBarFill.Parent).ActualWidth;
             if (containerWidth > 0)
-            {
+        {
                 ProgressBarFill.Width = containerWidth * Math.Min(1, Math.Max(0, displayProgress));
             }
 
@@ -369,7 +381,7 @@ public sealed partial class TrayPopupView : UserControl
             {
                 // Set selected background immediately
                 selectedButton.Background = new SolidColorBrush(SelectedColor);
-            }
+        }
         }
         catch { }
     }
@@ -435,17 +447,17 @@ public sealed partial class TrayPopupView : UserControl
     {
         try
         {
-            if (_viewModel?.Error != null)
-            {
-                ErrorBar.Title = _viewModel.Error.Message;
-                ErrorBar.Message = _viewModel.Error.RecoverySuggestion;
-                ErrorBar.IsOpen = true;
-            }
-            else
-            {
-                ErrorBar.IsOpen = false;
-            }
+        if (_viewModel?.Error != null)
+        {
+            ErrorBar.Title = _viewModel.Error.Message;
+            ErrorBar.Message = _viewModel.Error.RecoverySuggestion;
+            ErrorBar.IsOpen = true;
         }
+        else
+        {
+            ErrorBar.IsOpen = false;
+        }
+    }
         catch { }
     }
 
@@ -457,12 +469,12 @@ public sealed partial class TrayPopupView : UserControl
 
         if (_settingsOpen)
         {
-            SettingsColumn.Width = new GridLength(SettingsPanelWidth);
+            SettingsPanel.Visibility = Visibility.Visible;
             LoadSettingsValues();
         }
         else
         {
-            SettingsColumn.Width = new GridLength(0);
+            SettingsPanel.Visibility = Visibility.Collapsed;
         }
     }
 
@@ -515,7 +527,7 @@ public sealed partial class TrayPopupView : UserControl
         {
             System.Diagnostics.Debug.WriteLine($"LoadSettingsValues error: {ex.Message}");
             _isInitialized = true;
-        }
+            }
     }
     
     private bool IsStartupEnabled()
@@ -638,8 +650,8 @@ public sealed partial class TrayPopupView : UserControl
     private async void RefreshButton_Click(object sender, RoutedEventArgs e)
     {
         try
-        {
-            if (_viewModel != null)
+    {
+        if (_viewModel != null)
             {
                 await _viewModel.ForceRefreshAsync();
             }
@@ -658,7 +670,7 @@ public sealed partial class TrayPopupView : UserControl
     private void CloseSettingsButton_Click(object sender, RoutedEventArgs e)
     {
         _settingsOpen = false;
-        SettingsColumn.Width = new GridLength(0);
+        SettingsPanel.Visibility = Visibility.Collapsed;
     }
 
     private void LogoutButton_Click(object sender, RoutedEventArgs e)
@@ -667,7 +679,7 @@ public sealed partial class TrayPopupView : UserControl
         if (_settingsOpen)
         {
             _settingsOpen = false;
-            SettingsColumn.Width = new GridLength(0);
+            SettingsPanel.Visibility = Visibility.Collapsed;
         }
 
         _viewModel?.Logout();
@@ -692,11 +704,12 @@ public sealed partial class TrayPopupView : UserControl
                 _settings.ColorTheme = theme;
                 _settings.SaveSettings();
                 
-                // Apply theme immediately
-                ThemeService.Instance.SetTheme(theme);
-                
-                // Update the UI element theme
-                if (this.XamlRoot != null)
+            // Apply theme immediately
+            ThemeService.Instance.SetTheme(theme);
+            ApplyThemeColors(); // Add this
+            
+            // Update the UI element theme
+            if (this.XamlRoot != null)
                 {
                     this.RequestedTheme = ThemeService.Instance.GetElementTheme();
                 }
@@ -845,16 +858,72 @@ public sealed partial class TrayPopupView : UserControl
         }
     }
 
+
     public void RefreshData()
     {
         try
-        {
-            UpdateUI();
-            UpdateChart();
+    {
+        UpdateUI();
+        UpdateChart();
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"RefreshData error: {ex.Message}");
+        }
+    }
+
+    private void ApplyThemeColors()
+    {
+        try
+        {
+            var colors = ThemeService.Instance.CurrentColors;
+            
+            // Root background
+            if (this.Content is Grid rootGrid)
+            {
+                rootGrid.Background = new SolidColorBrush(colors.BackgroundColor);
+            }
+
+            // Settings panel background
+            SettingsPanel.Background = new SolidColorBrush(colors.BackgroundColor);
+            SettingsPanel.BorderBrush = new SolidColorBrush(colors.SecondaryBackgroundColor);
+
+            // Chart backgrounds
+            if (GlucoseChart.Parent is Border chartBorder)
+            {
+                chartBorder.Background = new SolidColorBrush(colors.SecondaryBackgroundColor);
+            }
+
+            // Stats row background
+            if (AverageText.Parent is StackPanel avgPanel && avgPanel.Parent is Grid statsGrid && statsGrid.Parent is Border statsBorder)
+            {
+                statsBorder.Background = new SolidColorBrush(colors.SecondaryBackgroundColor);
+            }
+
+            // Time range picker background
+            TimeRangePicker.Background = new SolidColorBrush(colors.SecondaryBackgroundColor);
+
+            // Text colors
+            GlucoseValueText.Foreground = new SolidColorBrush(colors.PrimaryTextColor);
+            TrendArrowText.Foreground = new SolidColorBrush(colors.PrimaryTextColor);
+            TrendDescriptionText.Foreground = new SolidColorBrush(colors.SecondaryTextColor);
+            TimeAgoText.Foreground = new SolidColorBrush(colors.SecondaryTextColor);
+            
+            // Update header gradient
+            // HeaderGradientStart.Color is updated in UpdateUI based on glucose value, 
+            // but we might want to respect theme here too if needed.
+            
+            // Footer border
+            if (LastUpdatedText.Parent is Grid footerGrid && footerGrid.Parent is Border footerBorder)
+            {
+                footerBorder.BorderBrush = new SolidColorBrush(colors.SecondaryBackgroundColor);
+            }
+            
+            LastUpdatedText.Foreground = new SolidColorBrush(colors.SecondaryTextColor);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"ApplyThemeColors error: {ex.Message}");
         }
     }
 }

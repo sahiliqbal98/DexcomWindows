@@ -1,4 +1,5 @@
 using DexcomWindows.Helpers;
+using DexcomWindows.Models;
 using DexcomWindows.Services;
 using DexcomWindows.ViewModels;
 using DexcomWindows.Views;
@@ -22,6 +23,7 @@ public partial class App : Application
     private TaskbarIcon? _trayIcon;
     private Window? _popupWindow;
     private TrayPopupView? _popupView;
+    private Grid? _popupRootGrid;
     private bool _isPopupAnimating;
 
     // Services
@@ -77,6 +79,9 @@ public partial class App : Application
         // Subscribe to view model changes to update tray icon
         _viewModel.PropertyChanged += ViewModel_PropertyChanged;
 
+        // Subscribe to theme changes to update popup window
+        ThemeService.Instance.ThemeChanged += OnThemeChanged;
+
         // Initialize tray icon
         InitializeTrayIcon();
 
@@ -98,6 +103,31 @@ public partial class App : Application
 
         // Setup click-away detection timer
         SetupClickAwayDetection();
+    }
+
+    private void OnThemeChanged(object? sender, Services.ColorTheme theme)
+    {
+        // Update popup window theme if open
+        if (_popupWindow != null && _popupRootGrid != null)
+        {
+            _popupWindow.DispatcherQueue.TryEnqueue(() =>
+            {
+                try
+                {
+                    _popupRootGrid.RequestedTheme = ThemeService.Instance.GetElementTheme();
+                    
+                    // Also trigger manual color application if the view supports it
+                    if (_popupView != null)
+                    {
+                        // We can't call ApplyThemeColors directly as it's private, 
+                        // but setting the theme on ThemeService triggers the change handling in the view too?
+                        // Actually the view subscribes to ThemeChanged event separately in its constructor/init
+                        // So we mainly just need to update the root grid theme here
+                    }
+                }
+                catch { }
+            });
+        }
     }
 
     private void InitializeTrayIcon()
@@ -189,6 +219,9 @@ public partial class App : Application
             Background = new SolidColorBrush(Microsoft.UI.Colors.Transparent)
         };
 
+        // Apply saved theme to the root grid
+        rootGrid.RequestedTheme = ThemeService.Instance.GetElementTheme();
+
         // Create a border for rounded corners and shadow effect
         var border = new Border
         {
@@ -199,10 +232,16 @@ public partial class App : Application
 
         rootGrid.Children.Add(border);
         _popupWindow.Content = rootGrid;
+        _popupRootGrid = rootGrid;
 
         // Make window borderless and position near tray
         WindowHelper.MakeBorderless(_popupWindow);
         WindowHelper.HideFromTaskbar(_popupWindow);
+        WindowHelper.MakeLayered(_popupWindow);
+        
+        // Start window fully transparent at Win32 level (prevents flicker)
+        WindowHelper.SetWindowOpacity(_popupWindow, 0);
+        
         WindowHelper.PositionNearTray(_popupWindow, width, height);
 
         // Handle window closing
@@ -213,57 +252,62 @@ public partial class App : Application
             _popupWindow = null;
         };
 
-        // Show window first
+        // Show window (it's invisible due to opacity 0)
         _popupWindow.Activate();
 
-        // Initialize popup view after activation (pass notifications for settings panel)
+        // Initialize popup view after activation
         _popupView.Initialize(_viewModel!, _settings!, _notifications);
 
-        // Apply fade-in animation
-        ApplyOpenAnimation(border);
-
-        _isPopupAnimating = false;
+        // Animate the window in smoothly
+        AnimateWindowOpen();
     }
 
-    private void ApplyOpenAnimation(Border border)
+    private async void AnimateWindowOpen()
     {
+        if (_popupWindow == null) return;
+        
         try
         {
-            // Get the compositor
-            var visual = ElementCompositionPreview.GetElementVisual(border);
-            var compositor = visual.Compositor;
-
-            // Start position: slightly below and transparent
-            visual.Opacity = 0;
-            visual.Offset = new System.Numerics.Vector3(0, 20, 0);
-
-            // Create fade animation
-            var fadeAnimation = compositor.CreateScalarKeyFrameAnimation();
-            fadeAnimation.InsertKeyFrame(0f, 0f);
-            fadeAnimation.InsertKeyFrame(1f, 1f, compositor.CreateCubicBezierEasingFunction(
-                new System.Numerics.Vector2(0.0f, 0.0f),
-                new System.Numerics.Vector2(0.2f, 1.0f)));
-            fadeAnimation.Duration = TimeSpan.FromMilliseconds(200);
-
-            // Create slide animation
-            var slideAnimation = compositor.CreateVector3KeyFrameAnimation();
-            slideAnimation.InsertKeyFrame(0f, new System.Numerics.Vector3(0, 20, 0));
-            slideAnimation.InsertKeyFrame(1f, new System.Numerics.Vector3(0, 0, 0), compositor.CreateCubicBezierEasingFunction(
-                new System.Numerics.Vector2(0.0f, 0.0f),
-                new System.Numerics.Vector2(0.2f, 1.0f)));
-            slideAnimation.Duration = TimeSpan.FromMilliseconds(200);
-
-            // Start animations
-            visual.StartAnimation("Opacity", fadeAnimation);
-            visual.StartAnimation("Offset", slideAnimation);
+            // Small delay to ensure window is ready
+            await Task.Delay(10);
+            
+            // Animate opacity from 0 to 255 over ~200ms
+            const int steps = 12;
+            const int delayPerStep = 16; // ~60fps
+            
+            for (int i = 1; i <= steps; i++)
+            {
+                if (_popupWindow == null) break;
+                
+                // Ease-out curve: faster at start, slower at end
+                double t = (double)i / steps;
+                double eased = 1 - Math.Pow(1 - t, 3); // Cubic ease-out
+                byte opacity = (byte)(eased * 255);
+                
+                WindowHelper.SetWindowOpacity(_popupWindow, opacity);
+                await Task.Delay(delayPerStep);
+            }
+            
+            // Ensure fully opaque at end
+            if (_popupWindow != null)
+            {
+                WindowHelper.SetWindowOpacity(_popupWindow, 255);
+            }
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Animation error: {ex.Message}");
+            // Ensure window is visible even if animation fails
+            if (_popupWindow != null)
+            {
+                WindowHelper.SetWindowOpacity(_popupWindow, 255);
+            }
         }
+        
+        _isPopupAnimating = false;
     }
 
-    private void ClosePopupWithAnimation()
+    private async void ClosePopupWithAnimation()
     {
         if (_popupWindow == null) return;
 
@@ -271,49 +315,21 @@ public partial class App : Application
 
         try
         {
-            var border = (_popupWindow.Content as Grid)?.Children.FirstOrDefault() as Border;
-            if (border != null)
+            // Animate opacity from 255 to 0 over ~150ms
+            const int steps = 9;
+            const int delayPerStep = 16; // ~60fps
+            
+            for (int i = 1; i <= steps; i++)
             {
-                var visual = ElementCompositionPreview.GetElementVisual(border);
-                var compositor = visual.Compositor;
-
-                // Create fade animation
-                var fadeAnimation = compositor.CreateScalarKeyFrameAnimation();
-                fadeAnimation.InsertKeyFrame(0f, 1f);
-                fadeAnimation.InsertKeyFrame(1f, 0f);
-                fadeAnimation.Duration = TimeSpan.FromMilliseconds(150);
-
-                // Create slide animation
-                var slideAnimation = compositor.CreateVector3KeyFrameAnimation();
-                slideAnimation.InsertKeyFrame(0f, new System.Numerics.Vector3(0, 0, 0));
-                slideAnimation.InsertKeyFrame(1f, new System.Numerics.Vector3(0, 10, 0));
-                slideAnimation.Duration = TimeSpan.FromMilliseconds(150);
-
-                // Start animations
-                visual.StartAnimation("Opacity", fadeAnimation);
-                visual.StartAnimation("Offset", slideAnimation);
-
-                // Close after animation
-                var timer = _mainWindow?.DispatcherQueue.CreateTimer();
-                if (timer != null)
-                {
-                    timer.Interval = TimeSpan.FromMilliseconds(150);
-                    timer.IsRepeating = false;
-                    timer.Tick += (_, _) =>
-                    {
-                        timer.Stop();
-                        try
-                        {
-                            _popupWindow?.Close();
-                        }
-                        catch { }
-                        _popupWindow = null;
-                        _popupView = null;
-                        _isPopupAnimating = false;
-                    };
-                    timer.Start();
-                    return;
-                }
+                if (_popupWindow == null) break;
+                
+                // Ease-in curve: slower at start, faster at end
+                double t = (double)i / steps;
+                double eased = t * t; // Quadratic ease-in
+                byte opacity = (byte)((1 - eased) * 255);
+                
+                WindowHelper.SetWindowOpacity(_popupWindow, opacity);
+                await Task.Delay(delayPerStep);
             }
         }
         catch (Exception ex)
@@ -321,7 +337,7 @@ public partial class App : Application
             System.Diagnostics.Debug.WriteLine($"Close animation error: {ex.Message}");
         }
 
-        // Fallback: close immediately
+        // Close the window
         try { _popupWindow?.Close(); } catch { }
         _popupWindow = null;
         _popupView = null;

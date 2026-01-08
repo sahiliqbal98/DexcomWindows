@@ -195,7 +195,7 @@ public class DexcomShareAPI
                     {
                         using var doc = JsonDocument.Parse(responseBody);
                         if (doc.RootElement.TryGetProperty("Message", out var msg))
-                        {
+                {
                             throw new ServerError(0, msg.GetString() ?? "Unknown error");
                         }
                     }
@@ -224,7 +224,7 @@ public class DexcomShareAPI
             {
                 throw new InvalidCredentialsError();
             }
-            
+
             if (responseBody.Contains("AccountNotFound"))
             {
                 throw new ServerError((int)response.StatusCode, 
@@ -249,7 +249,7 @@ public class DexcomShareAPI
             throw new NetworkError(ex);
         }
         catch (TaskCanceledException ex)
-        {
+    {
             throw new NetworkError(new Exception("Request timed out", ex));
         }
         catch (Exception ex)

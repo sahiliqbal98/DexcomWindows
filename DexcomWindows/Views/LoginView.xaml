@@ -19,14 +19,6 @@
                            HorizontalAlignment="Center"/>
             </StackPanel>
 
-            <!-- Important Note -->
-            <InfoBar x:Name="FollowerWarning"
-                     IsOpen="True"
-                     IsClosable="False"
-                     Severity="Warning"
-                     Title="Important"
-                     Message="Dexcom Share requires at least one follower who has ACCEPTED your invitation. The follower can be yourself using a different email address."/>
-
             <!-- Server Selection -->
             <StackPanel Spacing="4">
                 <TextBlock Text="Region" FontWeight="SemiBold"/>
@@ -123,6 +115,13 @@
             <Expander Header="Troubleshooting" HorizontalAlignment="Stretch">
                 <StackPanel Spacing="8" Padding="8">
                     <TextBlock TextWrapping="Wrap" FontWeight="SemiBold">
+                        Important:
+                    </TextBlock>
+                    <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                        Dexcom Share requires at least one follower who has ACCEPTED your invitation. The follower can be yourself using a different email address.
+                    </TextBlock>
+
+                    <TextBlock TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,8,0,0">
                         "Share not configured" error:
                     </TextBlock>
                     <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}">

@@ -33,19 +33,6 @@
                                HorizontalAlignment="Center" FontSize="18"/>
                 </StackPanel>
 
-                <!-- Warning Box -->
-                <Border Background="#19FF9500" BorderBrush="#4DFF9500" BorderThickness="1" 
-                        CornerRadius="12" Padding="20">
-                    <StackPanel Orientation="Horizontal" Spacing="16">
-                        <FontIcon Glyph="&#xE7BA;" Foreground="#FF9500" FontSize="28" VerticalAlignment="Top"/>
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="Important: Follower Required" FontWeight="SemiBold" FontSize="18"/>
-                            <TextBlock Text="You must have at least one follower who has ACCEPTED the Share invitation for this app to work."
-                                       TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="15"/>
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-
                 <!-- Region Picker -->
                 <ComboBox x:Name="ServerComboBox" Header="Region" HorizontalAlignment="Stretch" 
                           SelectedIndex="0" FontSize="16" Padding="16,12">
@@ -54,14 +41,20 @@
                 </ComboBox>
 
                 <!-- Username Field -->
-                <TextBox x:Name="UsernameTextBox" Header="Username or Email" 
-                         PlaceholderText="Enter your Dexcom username or email"
-                         FontSize="16" Padding="16,14"/>
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Username or Email" FontSize="16" FontWeight="SemiBold"/>
+                    <TextBox x:Name="UsernameTextBox"
+                             PlaceholderText="Enter your Dexcom username or email"
+                             FontSize="16"/>
+                </StackPanel>
 
                 <!-- Password Field -->
-                <PasswordBox x:Name="PasswordBox" Header="Password" 
-                             PlaceholderText="Enter your password"
-                             FontSize="16" Padding="16,14"/>
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Password" FontSize="16" FontWeight="SemiBold"/>
+                    <PasswordBox x:Name="PasswordBox"
+                                 PlaceholderText="Enter your password"
+                                 FontSize="16"/>
+                </StackPanel>
 
                 <!-- Error Bar -->
                 <InfoBar x:Name="LoginErrorBar" IsOpen="False" Severity="Error" Title="Error"/>
@@ -76,17 +69,29 @@
                               HorizontalAlignment="Center" Width="40" Height="40"/>
 
                 <!-- Info Box -->
-                <Border Background="#190078D7" CornerRadius="12" Padding="20">
-                    <StackPanel Orientation="Horizontal" Spacing="16">
-                        <FontIcon Glyph="&#xE946;" Foreground="#0078D7" FontSize="24" VerticalAlignment="Top"/>
-                        <TextBlock Text="Use the same username/email and password you use in the Dexcom app."
+                <Border Background="#190078D7" CornerRadius="12" Padding="16">
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <FontIcon Glyph="&#xE946;" Foreground="#0078D7" FontSize="22" VerticalAlignment="Top" Grid.Column="0"/>
+                        <TextBlock Grid.Column="1" 
+                                   Text="Use the same username/email and password you use in the Dexcom app."
                                    TextWrapping="Wrap" FontSize="15" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                    </StackPanel>
+                    </Grid>
                 </Border>
 
                 <!-- Setup Help Expander -->
                 <Expander Header="Setup Instructions" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                     <StackPanel Spacing="12" Padding="8">
+                        <Border Background="#26FF9500" CornerRadius="8" Padding="12">
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="Important: Follower Required" FontSize="15" FontWeight="SemiBold" Foreground="#FF9500"/>
+                                <TextBlock Text="You must have at least one follower who has ACCEPTED the Share invitation for this app to work."
+                                           TextWrapping="Wrap" FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                            </StackPanel>
+                        </Border>
                         <TextBlock Text="1. Open the Dexcom G7 app on your phone" FontSize="15"/>
                         <TextBlock Text="2. Go to Settings → Share" FontSize="15"/>
                         <TextBlock Text="3. Enable Share" FontSize="15"/>
@@ -114,13 +119,8 @@
 
         <!-- ==================== MAIN CONTENT (AUTHENTICATED) ==================== -->
         <Grid x:Name="MainContent" Visibility="Collapsed">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition x:Name="SettingsColumn" Width="0"/>
-            </Grid.ColumnDefinitions>
-
-            <!-- LEFT SIDE: Glucose Data -->
-            <Grid Grid.Column="0">
+            <!-- Main glucose data view -->
+            <Grid x:Name="GlucoseDataGrid">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
@@ -167,8 +167,8 @@
                             <TextBlock Text="mg/dL" FontSize="14" FontFamily="Segoe UI Variable"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Right"/>
                             <ProgressRing x:Name="RefreshSpinner" IsActive="False" Visibility="Collapsed" Width="24" Height="24" HorizontalAlignment="Right"/>
-                        </StackPanel>
-                    </Grid>
+                    </StackPanel>
+                </Grid>
                 </Grid>
 
                 <!-- CONTENT - NO SCROLL, EVERYTHING FITS -->
@@ -211,10 +211,10 @@
                     <!-- TIME RANGE PICKER -->
                     <Grid Grid.Row="2" x:Name="TimeRangePicker" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" 
                           CornerRadius="10" Padding="6" Margin="0,0,0,12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
@@ -253,11 +253,11 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            
+                    </Grid.ColumnDefinitions>
+
                             <TextBlock Grid.Column="0" Text="24h:" FontSize="14" FontWeight="SemiBold"
                                        FontFamily="Segoe UI Variable" 
-                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" 
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                        VerticalAlignment="Center"/>
                             
                             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="8">
@@ -265,21 +265,21 @@
                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center"/>
                                 <TextBlock x:Name="AverageText" Text="--" FontSize="24" FontWeight="Bold" 
                                            FontFamily="Segoe UI Variable" VerticalAlignment="Center"/>
-                            </StackPanel>
-                            
+                    </StackPanel>
+
                             <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="8">
                                 <TextBlock Text="SD" FontSize="14" FontFamily="Segoe UI Variable"
                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center"/>
                                 <TextBlock x:Name="StdDevText" Text="--" FontSize="24" FontWeight="Bold" 
                                            FontFamily="Segoe UI Variable" VerticalAlignment="Center"/>
-                            </StackPanel>
-                            
+                    </StackPanel>
+
                             <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
                                 <TextBlock Text="Range" FontSize="14" FontFamily="Segoe UI Variable"
                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center"/>
                                 <TextBlock x:Name="TimeInRangeText" Text="--%"  FontSize="24" FontWeight="Bold" 
                                            FontFamily="Segoe UI Variable" VerticalAlignment="Center" Foreground="#34C759"/>
-                            </StackPanel>
+                    </StackPanel>
                         </Grid>
                     </Border>
 
@@ -290,10 +290,10 @@
                 <!-- FOOTER -->
                 <Border Grid.Row="2" BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Padding="32,12">
                     <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
+                    </Grid.ColumnDefinitions>
 
                         <!-- Last Updated -->
                         <TextBlock Grid.Column="0" x:Name="LastUpdatedText" Text="Updated --" FontSize="13"
@@ -328,10 +328,9 @@
                 </Border>
             </Grid>
 
-            <!-- RIGHT SIDE: Settings Panel (slides in) -->
-            <Border x:Name="SettingsPanel" Grid.Column="1" 
-                    BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}" 
-                    BorderThickness="1,0,0,0"
+            <!-- Settings Panel (OVERLAY - covers entire content) -->
+            <Border x:Name="SettingsPanel" 
+                    Visibility="Collapsed"
                     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -348,7 +347,7 @@
                         <TextBlock Text="Settings" FontSize="28" FontWeight="Bold"/>
                         <Button Grid.Column="1" Click="CloseSettingsButton_Click" Style="{StaticResource SubtleButtonStyle}" Padding="12">
                             <FontIcon Glyph="&#xE711;" FontSize="20"/>
-                        </Button>
+                    </Button>
                     </Grid>
 
                     <!-- Settings Content -->
@@ -467,12 +466,12 @@
                                                    TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" Margin="0,8,0,0"/>
                                     </StackPanel>
                                 </Border>
-                            </StackPanel>
+                        </StackPanel>
 
                         </StackPanel>
                     </ScrollViewer>
                 </Grid>
             </Border>
-        </Grid>
+                </Grid>
     </Grid>
 </UserControl>

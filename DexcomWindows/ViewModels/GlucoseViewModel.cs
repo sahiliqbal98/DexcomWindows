@@ -91,8 +91,8 @@ public partial class GlucoseViewModel : ObservableObject
         {
             _dispatcher = DispatcherQueue.GetForCurrentThread();
             _isInitialized = true;
-            
-            // Check for existing session on startup
+
+        // Check for existing session on startup
             await CheckExistingSessionAsync();
         }
         catch (Exception ex)
@@ -114,8 +114,8 @@ public partial class GlucoseViewModel : ObservableObject
             try
             {
                 return Readings.Count > 0
-                    ? new GlucoseStatistics(GetReadingsForRange(SelectedTimeRange), _settings.TargetLow, _settings.TargetHigh)
-                    : null;
+        ? new GlucoseStatistics(GetReadingsForRange(SelectedTimeRange), _settings.TargetLow, _settings.TargetHigh)
+        : null;
             }
             catch
             {
@@ -150,9 +150,9 @@ public partial class GlucoseViewModel : ObservableObject
     public List<GlucoseReading> GetReadingsForRange(TimeRange range)
     {
         try
-        {
-            var cutoff = DateTime.Now.AddSeconds(-range.Seconds());
-            return Readings.Where(r => r.Timestamp >= cutoff).ToList();
+    {
+        var cutoff = DateTime.Now.AddSeconds(-range.Seconds());
+        return Readings.Where(r => r.Timestamp >= cutoff).ToList();
         }
         catch
         {
@@ -396,21 +396,21 @@ public partial class GlucoseViewModel : ObservableObject
         if (_dispatcher == null) return;
         
         try
+    {
+        _refreshTimer?.Stop();
+
+        NextRefreshTime = DateTime.Now + delay;
+        SecondsUntilRefresh = (int)delay.TotalSeconds;
+
+        _refreshTimer = _dispatcher.CreateTimer();
+        _refreshTimer.Interval = delay;
+        _refreshTimer.IsRepeating = false;
+        _refreshTimer.Tick += async (_, _) =>
         {
             _refreshTimer?.Stop();
-
-            NextRefreshTime = DateTime.Now + delay;
-            SecondsUntilRefresh = (int)delay.TotalSeconds;
-
-            _refreshTimer = _dispatcher.CreateTimer();
-            _refreshTimer.Interval = delay;
-            _refreshTimer.IsRepeating = false;
-            _refreshTimer.Tick += async (_, _) =>
-            {
-                _refreshTimer?.Stop();
-                await RefreshDataAsync();
-            };
-            _refreshTimer.Start();
+            await RefreshDataAsync();
+        };
+        _refreshTimer.Start();
         }
         catch (Exception ex)
         {
@@ -432,41 +432,41 @@ public partial class GlucoseViewModel : ObservableObject
         if (_dispatcher == null) return;
         
         try
-        {
-            _countdownTimer?.Stop();
+    {
+        _countdownTimer?.Stop();
 
-            _countdownTimer = _dispatcher.CreateTimer();
-            _countdownTimer.Interval = TimeSpan.FromSeconds(1);
-            _countdownTimer.IsRepeating = true;
-            _countdownTimer.Tick += (_, _) =>
+        _countdownTimer = _dispatcher.CreateTimer();
+        _countdownTimer.Interval = TimeSpan.FromSeconds(1);
+        _countdownTimer.IsRepeating = true;
+        _countdownTimer.Tick += (_, _) =>
             {
                 try
-                {
-                    if (NextRefreshTime != null)
-                    {
-                        var remaining = (NextRefreshTime.Value - DateTime.Now).TotalSeconds;
-                        SecondsUntilRefresh = Math.Max(0, (int)remaining);
-                    }
+        {
+            if (NextRefreshTime != null)
+            {
+                var remaining = (NextRefreshTime.Value - DateTime.Now).TotalSeconds;
+                SecondsUntilRefresh = Math.Max(0, (int)remaining);
+            }
 
-                    if (CurrentReading != null)
-                    {
-                        var elapsed = (DateTime.Now - CurrentReading.Timestamp).TotalSeconds;
-                        SecondsSinceLastReading = Math.Max(0, (int)elapsed);
-                    }
-                    else
-                    {
-                        SecondsSinceLastReading = 0;
-                    }
+            if (CurrentReading != null)
+            {
+                var elapsed = (DateTime.Now - CurrentReading.Timestamp).TotalSeconds;
+                SecondsSinceLastReading = Math.Max(0, (int)elapsed);
+            }
+            else
+            {
+                SecondsSinceLastReading = 0;
+            }
 
-                    OnPropertyChanged(nameof(IsDataStale));
-                    OnPropertyChanged(nameof(RefreshProgress));
+            OnPropertyChanged(nameof(IsDataStale));
+            OnPropertyChanged(nameof(RefreshProgress));
                 }
                 catch (Exception ex)
                 {
                     System.Diagnostics.Debug.WriteLine($"Countdown tick error: {ex.Message}");
                 }
-            };
-            _countdownTimer.Start();
+        };
+        _countdownTimer.Start();
         }
         catch (Exception ex)
         {
@@ -479,31 +479,31 @@ public partial class GlucoseViewModel : ObservableObject
         if (_dispatcher == null) return;
         
         try
-        {
-            _staleDataTimer?.Stop();
+    {
+        _staleDataTimer?.Stop();
 
-            _staleDataTimer = _dispatcher.CreateTimer();
-            _staleDataTimer.Interval = TimeSpan.FromMinutes(1);
-            _staleDataTimer.IsRepeating = true;
-            _staleDataTimer.Tick += (_, _) =>
+        _staleDataTimer = _dispatcher.CreateTimer();
+        _staleDataTimer.Interval = TimeSpan.FromMinutes(1);
+        _staleDataTimer.IsRepeating = true;
+        _staleDataTimer.Tick += (_, _) =>
             {
                 try
+        {
+            if (_alertSettings.StaleDataAlertEnabled && CurrentReading != null)
+            {
+                var minutesSinceReading = (DateTime.Now - CurrentReading.Timestamp).TotalMinutes;
+                if (minutesSinceReading >= _alertSettings.StaleDataThreshold)
                 {
-                    if (_alertSettings.StaleDataAlertEnabled && CurrentReading != null)
-                    {
-                        var minutesSinceReading = (DateTime.Now - CurrentReading.Timestamp).TotalMinutes;
-                        if (minutesSinceReading >= _alertSettings.StaleDataThreshold)
-                        {
-                            _notifications.SendStaleDataAlert(CurrentReading.Timestamp);
-                        }
+                    _notifications.SendStaleDataAlert(CurrentReading.Timestamp);
+                }
                     }
                 }
                 catch (Exception ex)
                 {
                     System.Diagnostics.Debug.WriteLine($"Stale data check error: {ex.Message}");
-                }
-            };
-            _staleDataTimer.Start();
+            }
+        };
+        _staleDataTimer.Start();
         }
         catch (Exception ex)
         {
@@ -514,15 +514,15 @@ public partial class GlucoseViewModel : ObservableObject
     private void StopAllTimers()
     {
         try
-        {
-            _refreshTimer?.Stop();
-            _refreshTimer = null;
-            _countdownTimer?.Stop();
-            _countdownTimer = null;
-            _staleDataTimer?.Stop();
-            _staleDataTimer = null;
-            NextRefreshTime = null;
-            SecondsUntilRefresh = 0;
+    {
+        _refreshTimer?.Stop();
+        _refreshTimer = null;
+        _countdownTimer?.Stop();
+        _countdownTimer = null;
+        _staleDataTimer?.Stop();
+        _staleDataTimer = null;
+        NextRefreshTime = null;
+        SecondsUntilRefresh = 0;
         }
         catch (Exception ex)
         {
@@ -533,18 +533,18 @@ public partial class GlucoseViewModel : ObservableObject
     private async Task CheckExistingSessionAsync()
     {
         try
+    {
+        var savedSession = _credentials.LoadSession();
+        if (savedSession != null)
         {
-            var savedSession = _credentials.LoadSession();
-            if (savedSession != null)
-            {
-                _sessionId = savedSession;
-                IsAuthenticated = true;
-                await RefreshDataAsync();
-                StartSmartRefresh();
-            }
-            else if (_credentials.HasCredentials)
-            {
-                await AttemptReauthenticationAsync();
+            _sessionId = savedSession;
+            IsAuthenticated = true;
+            await RefreshDataAsync();
+            StartSmartRefresh();
+        }
+        else if (_credentials.HasCredentials)
+        {
+            await AttemptReauthenticationAsync();
             }
         }
         catch (Exception ex)
@@ -556,25 +556,25 @@ public partial class GlucoseViewModel : ObservableObject
     private async Task AttemptReauthenticationAsync()
     {
         try
-        {
-            var authMethod = _credentials.LoadAuthMethod();
-            var server = _credentials.LoadServer();
+    {
+        var authMethod = _credentials.LoadAuthMethod();
+        var server = _credentials.LoadServer();
 
-            if (authMethod == DexcomShareAPI.AuthMethod.Username)
+        if (authMethod == DexcomShareAPI.AuthMethod.Username)
+        {
+            var creds = _credentials.LoadCredentials();
+            if (creds != null)
             {
-                var creds = _credentials.LoadCredentials();
-                if (creds != null)
-                {
-                    await LoginAsync(creds.Value.Username, creds.Value.Password, server);
-                }
+                await LoginAsync(creds.Value.Username, creds.Value.Password, server);
             }
-            else
+        }
+        else
+        {
+            var creds = _credentials.LoadAccountIdCredentials();
+            if (creds != null)
             {
-                var creds = _credentials.LoadAccountIdCredentials();
-                if (creds != null)
-                {
-                    await LoginWithAccountIdAsync(creds.Value.AccountId, creds.Value.Password, server);
-                }
+                await LoginWithAccountIdAsync(creds.Value.AccountId, creds.Value.Password, server);
+            }
             }
         }
         catch (Exception ex)

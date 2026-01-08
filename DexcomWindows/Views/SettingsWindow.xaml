@@ -55,11 +55,11 @@
             <StackPanel Padding="24,0,24,24" Spacing="16">
 
                 <!-- ==================== GENERAL TAB ==================== -->
-                <StackPanel x:Name="GeneralPanel" Spacing="16">
+                    <StackPanel x:Name="GeneralPanel" Spacing="16">
 
-                    <!-- Account Section -->
-                    <StackPanel Spacing="8">
-                        <TextBlock Text="Account" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                        <!-- Account Section -->
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Account" Style="{StaticResource SubtitleTextBlockStyle}"/>
                         <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 CornerRadius="8" Padding="16">
                             <Grid>
@@ -93,11 +93,11 @@
                                         Foreground="#FF3B30"/>
                             </Grid>
                         </Border>
-                    </StackPanel>
+                        </StackPanel>
 
-                    <!-- Appearance Section -->
-                    <StackPanel Spacing="8">
-                        <TextBlock Text="Appearance" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                        <!-- Appearance Section -->
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Appearance" Style="{StaticResource SubtitleTextBlockStyle}"/>
                         <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 CornerRadius="8" Padding="16">
                             <StackPanel Spacing="16">
@@ -147,7 +147,7 @@
                         <TextBlock Text="Timer Bar" Style="{StaticResource SubtitleTextBlockStyle}"/>
                         <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 CornerRadius="8" Padding="16">
-                            <StackPanel Spacing="12">
+                                <StackPanel Spacing="12">
                                 <RadioButton x:Name="ElapsedRadio" 
                                              GroupName="TimerBar"
                                              Checked="TimerBarMode_Changed">
@@ -168,18 +168,18 @@
                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                                     </StackPanel>
                                 </RadioButton>
-                            </StackPanel>
+                                </StackPanel>
                         </Border>
-                    </StackPanel>
+                        </StackPanel>
 
                     <!-- Chart Target Range Section -->
-                    <StackPanel Spacing="8">
+                        <StackPanel Spacing="8">
                         <TextBlock Text="Chart Target Range" Style="{StaticResource SubtitleTextBlockStyle}"/>
                         <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 CornerRadius="8" Padding="16">
-                            <StackPanel Spacing="16">
+                                <StackPanel Spacing="16">
                                 <!-- Low Target -->
-                                <StackPanel Spacing="4">
+                                    <StackPanel Spacing="4">
                                     <Grid>
                                         <TextBlock Text="Low Target"/>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
@@ -187,14 +187,14 @@
                                             <TextBlock Text=" mg/dL" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                                         </StackPanel>
                                     </Grid>
-                                    <Slider x:Name="TargetLowSlider"
+                                        <Slider x:Name="TargetLowSlider"
                                             Minimum="60" Maximum="120"
-                                            Value="80"
-                                            ValueChanged="TargetLowSlider_ValueChanged"/>
-                                </StackPanel>
+                                                Value="80"
+                                                ValueChanged="TargetLowSlider_ValueChanged"/>
+                                    </StackPanel>
 
                                 <!-- High Target -->
-                                <StackPanel Spacing="4">
+                                    <StackPanel Spacing="4">
                                     <Grid>
                                         <TextBlock Text="High Target"/>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
@@ -202,23 +202,23 @@
                                             <TextBlock Text=" mg/dL" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                                         </StackPanel>
                                     </Grid>
-                                    <Slider x:Name="TargetHighSlider"
-                                            Minimum="120" Maximum="200"
-                                            Value="160"
-                                            ValueChanged="TargetHighSlider_ValueChanged"/>
+                                        <Slider x:Name="TargetHighSlider"
+                                                Minimum="120" Maximum="200"
+                                                Value="160"
+                                                ValueChanged="TargetHighSlider_ValueChanged"/>
+                                    </StackPanel>
                                 </StackPanel>
-                            </StackPanel>
                         </Border>
-                    </StackPanel>
+                        </StackPanel>
 
-                    <!-- Startup Section -->
-                    <StackPanel Spacing="8">
-                        <TextBlock Text="Startup" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                        <!-- Startup Section -->
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Startup" Style="{StaticResource SubtitleTextBlockStyle}"/>
                         <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 CornerRadius="8" Padding="16">
-                            <ToggleSwitch x:Name="StartupToggle"
-                                          Header="Start with Windows"
-                                          Toggled="StartupToggle_Toggled"/>
+                                <ToggleSwitch x:Name="StartupToggle"
+                                              Header="Start with Windows"
+                                              Toggled="StartupToggle_Toggled"/>
                         </Border>
                     </StackPanel>
 
@@ -245,7 +245,7 @@
                 </StackPanel>
 
                 <!-- ==================== ALERTS TAB ==================== -->
-                <StackPanel x:Name="AlertsPanel" Spacing="16" Visibility="Collapsed">
+                    <StackPanel x:Name="AlertsPanel" Spacing="16" Visibility="Collapsed">
 
                     <!-- Notification Status -->
                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
@@ -279,12 +279,12 @@
                                       Toggled="AlertsEnabledToggle_Toggled"/>
                     </Border>
 
-                    <!-- Notification Style -->
-                    <StackPanel Spacing="8">
-                        <TextBlock Text="Notification Style" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                        <!-- Notification Style -->
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Notification Style" Style="{StaticResource SubtitleTextBlockStyle}"/>
                         <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 CornerRadius="8" Padding="16">
-                            <StackPanel Spacing="8">
+                                <StackPanel Spacing="8">
                                 <CheckBox x:Name="ShowBannersCheck" 
                                           Content="Show banner notifications"
                                           Checked="NotificationStyle_Changed" 
@@ -293,13 +293,13 @@
                                           Content="Play sound"
                                           Checked="NotificationStyle_Changed" 
                                           Unchecked="NotificationStyle_Changed"/>
-                            </StackPanel>
+                                </StackPanel>
                         </Border>
-                    </StackPanel>
+                        </StackPanel>
 
                     <!-- Low Glucose Alerts -->
-                    <StackPanel Spacing="8">
-                        <TextBlock Text="Low Glucose Alerts" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Low Glucose Alerts" Style="{StaticResource SubtitleTextBlockStyle}"/>
                         <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 CornerRadius="8" Padding="16">
                             <StackPanel Spacing="16">
@@ -414,51 +414,51 @@
                                 CornerRadius="8" Padding="16">
                             <StackPanel Spacing="8">
                                 <ToggleSwitch x:Name="RisingQuicklyToggle"
-                                              Toggled="AlertToggle_Changed">
-                                    <ToggleSwitch.Header>
+                                                  Toggled="AlertToggle_Changed">
+                                        <ToggleSwitch.Header>
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <TextBlock Text="⇈" FontSize="16"/>
                                             <TextBlock Text="Rising Quickly"/>
-                                        </StackPanel>
-                                    </ToggleSwitch.Header>
-                                </ToggleSwitch>
+                                            </StackPanel>
+                                        </ToggleSwitch.Header>
+                                    </ToggleSwitch>
                                 <ToggleSwitch x:Name="RisingToggle"
-                                              Toggled="AlertToggle_Changed">
-                                    <ToggleSwitch.Header>
+                                                  Toggled="AlertToggle_Changed">
+                                        <ToggleSwitch.Header>
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <TextBlock Text="↑" FontSize="16"/>
                                             <TextBlock Text="Rising"/>
-                                        </StackPanel>
-                                    </ToggleSwitch.Header>
-                                </ToggleSwitch>
+                                            </StackPanel>
+                                        </ToggleSwitch.Header>
+                                    </ToggleSwitch>
                                 <ToggleSwitch x:Name="FallingToggle"
-                                              Toggled="AlertToggle_Changed">
-                                    <ToggleSwitch.Header>
+                                                  Toggled="AlertToggle_Changed">
+                                        <ToggleSwitch.Header>
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <TextBlock Text="↓" FontSize="16"/>
                                             <TextBlock Text="Falling"/>
-                                        </StackPanel>
-                                    </ToggleSwitch.Header>
-                                </ToggleSwitch>
+                                            </StackPanel>
+                                        </ToggleSwitch.Header>
+                                    </ToggleSwitch>
                                 <ToggleSwitch x:Name="FallingQuicklyToggle"
-                                              Toggled="AlertToggle_Changed">
-                                    <ToggleSwitch.Header>
+                                                  Toggled="AlertToggle_Changed">
+                                        <ToggleSwitch.Header>
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <TextBlock Text="⇊" FontSize="16"/>
                                             <TextBlock Text="Falling Quickly"/>
-                                        </StackPanel>
-                                    </ToggleSwitch.Header>
-                                </ToggleSwitch>
-                            </StackPanel>
+                                            </StackPanel>
+                                        </ToggleSwitch.Header>
+                                    </ToggleSwitch>
+                                </StackPanel>
                         </Border>
-                    </StackPanel>
+                        </StackPanel>
 
-                    <!-- Other Alerts -->
-                    <StackPanel Spacing="8">
+                        <!-- Other Alerts -->
+                        <StackPanel Spacing="8">
                         <TextBlock Text="Other" Style="{StaticResource SubtitleTextBlockStyle}"/>
                         <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 CornerRadius="8" Padding="16">
-                            <StackPanel Spacing="12">
+                                <StackPanel Spacing="12">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
@@ -474,7 +474,7 @@
                                     <ToggleSwitch Grid.Column="1" 
                                                   x:Name="StaleDataToggle"
                                                   Toggled="AlertToggle_Changed"/>
-                                </Grid>
+                            </Grid>
 
                                 <ComboBox x:Name="StaleDataIntervalCombo"
                                           Header="Alert after"
@@ -485,12 +485,12 @@
                                     <ComboBoxItem Content="20 minutes" Tag="20"/>
                                     <ComboBoxItem Content="30 minutes" Tag="30"/>
                                 </ComboBox>
-                            </StackPanel>
+                        </StackPanel>
                         </Border>
                     </StackPanel>
 
                     <!-- Alert Cooldowns -->
-                    <StackPanel Spacing="8">
+                        <StackPanel Spacing="8">
                         <TextBlock Text="Alert Cooldowns" Style="{StaticResource SubtitleTextBlockStyle}"/>
                         <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 CornerRadius="8" Padding="16">
@@ -515,18 +515,18 @@
                                     <ComboBoxItem Content="10 minutes" Tag="10"/>
                                     <ComboBoxItem Content="15 minutes" Tag="15"/>
                                 </ComboBox>
-                            </StackPanel>
+                                </StackPanel>
                         </Border>
-                    </StackPanel>
+                        </StackPanel>
 
                     <!-- Reset Button -->
                     <Button Content="Reset All to Defaults"
                             HorizontalAlignment="Center"
                             Click="ResetAlerts_Click"
                             Margin="0,8,0,0"/>
+                    </StackPanel>
                 </StackPanel>
-            </StackPanel>
-        </ScrollViewer>
+            </ScrollViewer>
 
         <!-- Footer -->
         <Border Grid.Row="3" 

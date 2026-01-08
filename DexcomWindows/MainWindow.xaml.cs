@@ -24,12 +24,12 @@ public sealed partial class MainWindow : Window
     {
         try
         {
-            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
-            var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hwnd);
-            var appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId);
+        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+        var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hwnd);
+        var appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId);
 
             // Make the window as small as possible
-            appWindow.Resize(new Windows.Graphics.SizeInt32(1, 1));
+        appWindow.Resize(new Windows.Graphics.SizeInt32(1, 1));
 
             // Move it off-screen
             appWindow.Move(new Windows.Graphics.PointInt32(-10000, -10000));
@@ -46,7 +46,7 @@ public sealed partial class MainWindow : Window
             }
 
             // Hide the window
-            appWindow.Hide();
+        appWindow.Hide();
         }
         catch (Exception ex)
         {

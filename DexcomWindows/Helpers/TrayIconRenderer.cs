@@ -33,11 +33,11 @@ public static class TrayIconRenderer
     }
 
     /// <summary>
-    /// Create an icon showing "-- ●" for no data state
+    /// Create an icon showing "--" for no data state (red to draw attention)
     /// </summary>
     public static Icon CreateNoDataIcon()
     {
-        return CreateTextIcon("--", "●", Color.FromArgb(128, 128, 128));
+        return CreateTextIcon("--", "", Color.FromArgb(255, 59, 48)); // Red - needs attention
     }
 
     /// <summary>
@@ -63,132 +63,97 @@ public static class TrayIconRenderer
     }
 
     /// <summary>
-    /// Create an icon with text and arrow
+    /// Create an icon with glucose value text and dynamic color
     /// </summary>
     private static Icon CreateTextIcon(string value, string arrow, Color color)
     {
-        using var bitmap = new Bitmap(LargeIconSize, LargeIconSize);
-        using var g = Graphics.FromImage(bitmap);
+        // Use 48x48 - good balance of quality and compatibility
+        const int size = 48;
+        
+        try
+        {
+            using var bitmap = new Bitmap(size, size, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            using var g = Graphics.FromImage(bitmap);
 
-        SetupGraphics(g);
-        g.Clear(Color.Transparent);
+            // High quality rendering
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            g.CompositingQuality = CompositingQuality.HighQuality;
+            
+            g.Clear(Color.Transparent);
 
-        // Draw background circle for better visibility
-        using var bgBrush = new SolidBrush(Color.FromArgb(40, color));
-        g.FillEllipse(bgBrush, 0, 0, LargeIconSize - 1, LargeIconSize - 1);
+            // Fill with glucose color - simple rectangle for max coverage
+            using (var bgBrush = new SolidBrush(color))
+            {
+                g.FillRectangle(bgBrush, 0, 0, size, size);
+            }
 
-        // Draw border
-        using var borderPen = new Pen(Color.FromArgb(80, color), 1.5f);
-        g.DrawEllipse(borderPen, 1, 1, LargeIconSize - 3, LargeIconSize - 3);
+            // Determine font size based on text length
+            float fontSize = value.Length switch
+            {
+                1 => 32f,
+                2 => 28f,
+                3 => 22f,
+                _ => 18f
+            };
 
-        // Draw center fill with glucose color
-        using var centerBrush = new SolidBrush(color);
-        g.FillEllipse(centerBrush, 4, 4, LargeIconSize - 9, LargeIconSize - 9);
+            // Create font - use Arial which is always available
+            using var font = new Font("Arial", fontSize, FontStyle.Bold, GraphicsUnit.Pixel);
+            using var whiteBrush = new SolidBrush(Color.White);
+            using var shadowBrush = new SolidBrush(Color.FromArgb(80, 0, 0, 0));
 
-        // Draw a small highlight for 3D effect
-        using var highlightBrush = new SolidBrush(Color.FromArgb(60, 255, 255, 255));
-        g.FillEllipse(highlightBrush, 6, 5, 8, 6);
+            // Measure text to center it
+            var textSize = g.MeasureString(value, font);
+            float x = (size - textSize.Width) / 2;
+            float y = (size - textSize.Height) / 2;
 
-        return Icon.FromHandle(bitmap.GetHicon());
+            // Draw shadow then white text
+            g.DrawString(value, font, shadowBrush, x + 1, y + 1);
+            g.DrawString(value, font, whiteBrush, x, y);
+
+            // Create icon - need to handle the HICON properly
+            IntPtr hIcon = bitmap.GetHicon();
+            
+            // Create a new icon from the handle
+            using var tempIcon = Icon.FromHandle(hIcon);
+            
+            // Clone it so we own the memory
+            var resultIcon = (Icon)tempIcon.Clone();
+            
+            // Destroy the original handle
+            DestroyIcon(hIcon);
+            
+            return resultIcon;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"CreateTextIcon error: {ex.Message}");
+            // Return a simple colored square as fallback
+            return CreateSimpleFallbackIcon(color);
+        }
     }
 
     /// <summary>
-    /// Create a detailed text icon (for larger displays or tooltips)
-    /// This creates a wider icon with actual text - useful for some taskbar modes
+    /// Simple fallback icon if text rendering fails
     /// </summary>
-    public static Icon CreateDetailedTextIcon(GlucoseReading? reading, int width = 48, int height = 16)
+    private static Icon CreateSimpleFallbackIcon(Color color)
     {
-        if (reading == null)
-        {
-            return CreateDetailedNoDataIcon(width, height);
-        }
-
-        using var bitmap = new Bitmap(width, height);
+        using var bitmap = new Bitmap(16, 16);
         using var g = Graphics.FromImage(bitmap);
-
-        SetupGraphics(g);
-        g.Clear(Color.Transparent);
-
-        var color = GetGlucoseColor(reading.ColorCategory);
-        var text = $"{reading.Value}{reading.Trend.Symbol()}";
-
-        // Use a nice rounded font
-        using var font = GetBestFont(9f, FontStyle.Bold);
-        using var brush = new SolidBrush(color);
-
-        // Measure text
-        var textSize = g.MeasureString(text, font);
-
-        // Center the text
-        float x = (width - textSize.Width) / 2;
-        float y = (height - textSize.Height) / 2;
-
-        // Draw text shadow for better visibility
-        using var shadowBrush = new SolidBrush(Color.FromArgb(100, 0, 0, 0));
-        g.DrawString(text, font, shadowBrush, x + 1, y + 1);
-
-        // Draw main text
-        g.DrawString(text, font, brush, x, y);
-
-        return Icon.FromHandle(bitmap.GetHicon());
+        
+        g.Clear(color);
+        
+        IntPtr hIcon = bitmap.GetHicon();
+        using var tempIcon = Icon.FromHandle(hIcon);
+        var resultIcon = (Icon)tempIcon.Clone();
+        DestroyIcon(hIcon);
+        
+        return resultIcon;
     }
 
-    private static Icon CreateDetailedNoDataIcon(int width, int height)
-    {
-        using var bitmap = new Bitmap(width, height);
-        using var g = Graphics.FromImage(bitmap);
-
-        SetupGraphics(g);
-        g.Clear(Color.Transparent);
-
-        using var font = GetBestFont(9f, FontStyle.Bold);
-        using var brush = new SolidBrush(Color.FromArgb(128, 128, 128));
-
-        var text = "-- ●";
-        var textSize = g.MeasureString(text, font);
-        float x = (width - textSize.Width) / 2;
-        float y = (height - textSize.Height) / 2;
-
-        g.DrawString(text, font, brush, x, y);
-
-        return Icon.FromHandle(bitmap.GetHicon());
-    }
-
-    /// <summary>
-    /// Get the best available font for tray icon rendering
-    /// Prefers Segoe UI Variable, falls back to Segoe UI, then Arial
-    /// </summary>
-    private static Font GetBestFont(float size, FontStyle style)
-    {
-        var fontFamilies = new[]
-        {
-            "Segoe UI Variable",
-            "Segoe UI",
-            "Segoe UI Semibold",
-            "Arial"
-        };
-
-        foreach (var family in fontFamilies)
-        {
-            try
-            {
-                var font = new Font(family, size, style, GraphicsUnit.Point);
-                if (font.Name.Equals(family, StringComparison.OrdinalIgnoreCase) ||
-                    font.OriginalFontName?.Equals(family, StringComparison.OrdinalIgnoreCase) == true)
-                {
-                    return font;
-                }
-                font.Dispose();
-            }
-            catch
-            {
-                // Font not available, try next
-            }
-        }
-
-        // Fallback
-        return new Font(FontFamily.GenericSansSerif, size, style, GraphicsUnit.Point);
-    }
+    [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = System.Runtime.InteropServices.CharSet.Auto)]
+    private static extern bool DestroyIcon(IntPtr handle);
 
     private static void SetupGraphics(Graphics g)
     {

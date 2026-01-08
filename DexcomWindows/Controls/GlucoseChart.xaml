@@ -15,27 +15,23 @@
                 PointerExited="ChartCanvas_PointerExited"
                 Background="Transparent"/>
 
-        <!-- Tooltip overlay -->
+        <!-- Tooltip overlay - high contrast for visibility -->
         <Border x:Name="TooltipBorder"
                 Visibility="Collapsed"
-                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                Background="#F0202020"
+                BorderBrush="#60FFFFFF"
                 BorderThickness="1"
-                CornerRadius="6"
-                Padding="8,6"
+                CornerRadius="8"
+                Padding="12,8"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
                 IsHitTestVisible="False">
-            <Border.Shadow>
-                <ThemeShadow/>
-            </Border.Shadow>
             <StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="4">
-                    <TextBlock x:Name="TooltipValue" FontSize="14" FontWeight="SemiBold"/>
-                    <TextBlock x:Name="TooltipTrend" FontSize="14"/>
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <TextBlock x:Name="TooltipValue" FontSize="18" FontWeight="Bold" Foreground="White"/>
+                    <TextBlock x:Name="TooltipTrend" FontSize="18" FontWeight="Bold"/>
                 </StackPanel>
-                <TextBlock x:Name="TooltipTime" FontSize="11" 
-                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                <TextBlock x:Name="TooltipTime" FontSize="13" Foreground="#CCCCCC" Margin="0,2,0,0"/>
             </StackPanel>
         </Border>
 

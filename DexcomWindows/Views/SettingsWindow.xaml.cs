@@ -176,7 +176,7 @@ public sealed partial class SettingsWindow : Window
     // Event Handlers
 
     private void TabButton_Click(object sender, RoutedEventArgs e)
-    {
+        {
         if (sender is not Button button) return;
 
         var tag = button.Tag?.ToString();

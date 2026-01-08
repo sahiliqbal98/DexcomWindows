@@ -48,6 +48,9 @@ public class SettingsService
     // Chart settings
     public TimeRange DefaultTimeRange { get; set; } = TimeRange.ThreeHours;
 
+    // UI hints
+    public bool TrayPinHintDismissed { get; set; } = false;
+
     // Startup
     public bool StartWithWindows
     {
@@ -104,7 +107,8 @@ public class SettingsService
                 ["Server"] = Server.ToString(),
                 ["AuthMethod"] = AuthMethod.ToString(),
                 ["SessionTimestamp"] = SessionTimestamp?.ToString("O") ?? "",
-                ["DefaultTimeRange"] = DefaultTimeRange.ToString()
+                ["DefaultTimeRange"] = DefaultTimeRange.ToString(),
+                ["TrayPinHintDismissed"] = TrayPinHintDismissed
             };
 
             var json = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true });
@@ -171,6 +175,9 @@ public class SettingsService
 
             if (data.TryGetValue("DefaultTimeRange", out var dtr) && Enum.TryParse<TimeRange>(dtr.GetString(), out var timeRange))
                 DefaultTimeRange = timeRange;
+
+            if (data.TryGetValue("TrayPinHintDismissed", out var tph))
+                TrayPinHintDismissed = tph.GetBoolean();
         }
         catch (Exception ex)
         {
