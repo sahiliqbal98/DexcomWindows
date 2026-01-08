@@ -3,6 +3,7 @@ using Microsoft.Windows.AppNotifications;
 using Microsoft.Windows.AppNotifications.Builder;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Runtime.InteropServices;
 
 namespace DexcomWindows.Services;
 
@@ -13,6 +14,7 @@ public class NotificationService
 {
     private readonly Dictionary<AlertType, DateTime> _cooldowns = new();
     private readonly string _iconFolder;
+    private readonly string _appLogoPath;
 
     // Cooldown intervals (matching Mac app)
     private TimeSpan _alertCooldown = TimeSpan.FromMinutes(15);
@@ -33,6 +35,12 @@ public class NotificationService
         StaleData
     }
 
+    // For setting AppUserModelID
+    [DllImport("shell32.dll", SetLastError = true)]
+    private static extern void SetCurrentProcessExplicitAppUserModelID([MarshalAs(UnmanagedType.LPWStr)] string AppID);
+
+    private const string AppId = "SteadySugar.DexcomWindows";
+
     public NotificationService()
     {
         // Create folder for notification icons
@@ -40,8 +48,15 @@ public class NotificationService
         _iconFolder = Path.Combine(appData, "DexcomWindows", "NotificationIcons");
         Directory.CreateDirectory(_iconFolder);
 
+        // Get app logo path from Assets
+        var exeDir = Path.GetDirectoryName(System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName) ?? "";
+        _appLogoPath = Path.Combine(exeDir, "Assets", "Icons", "app-logo.png");
+
         try
         {
+            // Set AppUserModelID for proper notification identity
+            SetCurrentProcessExplicitAppUserModelID(AppId);
+
             // Initialize notification manager
             AppNotificationManager.Default.NotificationInvoked += OnNotificationInvoked;
             AppNotificationManager.Default.Register();
@@ -160,6 +175,25 @@ public class NotificationService
     }
 
     /// <summary>
+    /// Get the app logo URI for notifications
+    /// </summary>
+    private Uri? GetAppLogoUri()
+    {
+        try
+        {
+            if (File.Exists(_appLogoPath))
+            {
+                return new Uri(_appLogoPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to get app logo: {ex.Message}");
+        }
+        return null;
+    }
+
+    /// <summary>
     /// Send alert for stale data
     /// </summary>
     public void SendStaleDataAlert(DateTime lastReading)
@@ -173,6 +207,13 @@ public class NotificationService
             .AddText($"Last reading {minutesAgo} minutes ago")
             .AddText("Check your Dexcom connection.");
 
+        // Add app logo
+        var logoUri = GetAppLogoUri();
+        if (logoUri != null)
+        {
+            builder.SetAppLogoOverride(logoUri, AppNotificationImageCrop.Circle);
+        }
+
         if (PlaySound)
         {
             builder.SetAudioUri(new Uri("ms-winsoundevent:Notification.Default"));
@@ -183,14 +224,32 @@ public class NotificationService
     }
 
     /// <summary>
-    /// Send test notification
+    /// Send test notification with current glucose value
     /// </summary>
-    public void SendTestNotification()
+    public void SendTestNotification(int? currentValue = null, Color? currentColor = null)
     {
         var builder = new AppNotificationBuilder()
             .AddText("Test Notification")
-            .AddText("Dexcom Windows")
+            .AddText(currentValue.HasValue ? $"Current: {currentValue.Value} mg/dL" : "Steady Sugar")
             .AddText("Notifications are working! You'll receive alerts when glucose goes out of range.");
+
+        // Use current glucose value if available, otherwise use app logo
+        if (currentValue.HasValue && currentColor.HasValue)
+        {
+            var iconUri = CreateNotificationIcon(currentValue.Value, currentColor.Value);
+            if (iconUri != null)
+            {
+                builder.SetAppLogoOverride(iconUri, AppNotificationImageCrop.Circle);
+            }
+        }
+        else
+        {
+            var logoUri = GetAppLogoUri();
+            if (logoUri != null)
+            {
+                builder.SetAppLogoOverride(logoUri, AppNotificationImageCrop.Circle);
+            }
+        }
 
         if (PlaySound)
         {

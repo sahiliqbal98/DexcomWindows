@@ -844,7 +844,18 @@ public sealed partial class TrayPopupView : UserControl
         {
             if (_notifications != null)
             {
-                _notifications.SendTestNotification();
+                // Get current glucose value and color if available
+                var reading = _viewModel?.CurrentReading;
+                if (reading != null)
+                {
+                    var color = ColorThemes.GetGlucoseColor(reading.ColorCategory);
+                    var drawingColor = System.Drawing.Color.FromArgb(color.A, color.R, color.G, color.B);
+                    _notifications.SendTestNotification(reading.Value, drawingColor);
+                }
+                else
+                {
+                    _notifications.SendTestNotification();
+                }
                 System.Diagnostics.Debug.WriteLine("Test notification sent");
             }
             else

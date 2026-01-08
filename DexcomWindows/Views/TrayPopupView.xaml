@@ -17,17 +17,8 @@
             <StackPanel Padding="60,40" MaxWidth="600" HorizontalAlignment="Center" Spacing="24">
                 <!-- App Icon and Title -->
                 <StackPanel HorizontalAlignment="Center" Spacing="16" Margin="0,20,0,20">
-                    <Border Width="100" Height="100" CornerRadius="50" HorizontalAlignment="Center">
-                        <Border.Background>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                <GradientStop Color="#00B4A6" Offset="0"/>
-                                <GradientStop Color="#34C759" Offset="1"/>
-                            </LinearGradientBrush>
-                        </Border.Background>
-                        <FontIcon Glyph="&#xE7EF;" FontSize="44" Foreground="White" 
-                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-                    <TextBlock Text="Dexcom" FontSize="36" FontWeight="Bold" HorizontalAlignment="Center"/>
+                    <Image Source="ms-appx:///Assets/Icons/app-logo.png" Width="100" Height="100" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Steady Sugar" FontSize="36" FontWeight="Bold" HorizontalAlignment="Center"/>
                     <TextBlock Text="Sign in with your Dexcom account" 
                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                HorizontalAlignment="Center" FontSize="18"/>
@@ -107,11 +98,14 @@
                 <!-- Footer -->
                 <Grid Margin="0,20,0,0">
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <HyperlinkButton Content="Dexcom Support" NavigateUri="https://www.dexcom.com/support" FontSize="15"/>
-                    <Button Grid.Column="1" Content="Quit" Click="QuitButton_Click" 
+                    <HyperlinkButton Grid.Column="1" Content="Contact Developer" NavigateUri="mailto:steadysugar1@gmail.com" FontSize="15" Margin="12,0,0,0"/>
+                    <Button Grid.Column="3" Content="Quit" Click="QuitButton_Click" 
                             Style="{StaticResource SubtleButtonStyle}" FontSize="15" Padding="20,12"/>
                 </Grid>
             </StackPanel>
@@ -458,10 +452,19 @@
                                 <TextBlock Text="About" FontSize="20" FontWeight="SemiBold"/>
                                 <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="12" Padding="20">
                                     <StackPanel Spacing="12">
-                                        <TextBlock Text="Dexcom Windows" FontSize="18" FontWeight="SemiBold"/>
-                                        <TextBlock Text="Version 1.0.0" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="14"/>
+                                        <StackPanel Orientation="Horizontal" Spacing="16">
+                                            <Image Source="ms-appx:///Assets/Icons/app-logo.png" Width="64" Height="64"/>
+                                            <StackPanel VerticalAlignment="Center">
+                                                <TextBlock Text="Steady Sugar" FontSize="20" FontWeight="SemiBold"/>
+                                                <TextBlock Text="Version 1.0.0" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="14"/>
+                                            </StackPanel>
+                                        </StackPanel>
                                         <TextBlock Text="A Windows system tray app for monitoring Dexcom glucose readings."
                                                    TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="14"/>
+                                        <TextBlock TextWrapping="Wrap" FontSize="14" Margin="0,4,0,0">
+                                            <Run Text="Contact the developer with issues, bugs, feature requests, or anything else at "/>
+                                            <Hyperlink NavigateUri="mailto:steadysugar1@gmail.com">steadysugar1@gmail.com</Hyperlink>
+                                        </TextBlock>
                                         <TextBlock Text="This app is not affiliated with or endorsed by Dexcom, Inc. The information displayed is for informational purposes only."
                                                    TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" Margin="0,8,0,0"/>
                                     </StackPanel>
@@ -472,6 +475,7 @@
                     </ScrollViewer>
                 </Grid>
             </Border>
-                </Grid>
+
+        </Grid>
     </Grid>
 </UserControl>
