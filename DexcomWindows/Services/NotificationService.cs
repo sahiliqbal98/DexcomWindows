@@ -1,4 +1,5 @@
 using DexcomWindows.Models;
+using DexcomWindows.Helpers;
 using Microsoft.Windows.AppNotifications;
 using Microsoft.Windows.AppNotifications.Builder;
 using System.Drawing;
@@ -45,7 +46,7 @@ public class NotificationService
     {
         // Create folder for notification icons
         var appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        _iconFolder = Path.Combine(appData, "DexcomWindows", "NotificationIcons");
+        _iconFolder = Path.Combine(appData, "SteadySugar", "NotificationIcons");
         Directory.CreateDirectory(_iconFolder);
 
         // Get app logo path from Assets
@@ -56,6 +57,14 @@ public class NotificationService
         {
             // Set AppUserModelID for proper notification identity
             SetCurrentProcessExplicitAppUserModelID(AppId);
+
+            // Ensure a Start Menu shortcut exists with the same AUMID + icon.
+            // Windows uses this to determine the *header* icon in toast notifications for unpackaged apps.
+            var exePath = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName;
+            if (!string.IsNullOrWhiteSpace(exePath))
+            {
+                StartMenuShortcutHelper.EnsureStartMenuShortcut("Steady Sugar", AppId, exePath, exePath);
+            }
 
             // Initialize notification manager
             AppNotificationManager.Default.NotificationInvoked += OnNotificationInvoked;
@@ -74,7 +83,7 @@ public class NotificationService
     {
         try
         {
-            const int size = 64;
+            const int size = 256; // Larger size for crisp notification icons
             using var bitmap = new Bitmap(size, size, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             using var g = Graphics.FromImage(bitmap);
 
@@ -85,13 +94,13 @@ public class NotificationService
             using var brush = new SolidBrush(color);
             g.FillEllipse(brush, 2, 2, size - 4, size - 4);
 
-            // Draw value text
+            // Draw value text (scaled for 256px icon)
             var fontSize = value.ToString().Length switch
             {
-                1 => 32f,
-                2 => 28f,
-                3 => 22f,
-                _ => 18f
+                1 => 140f,
+                2 => 120f,
+                3 => 100f,
+                _ => 80f
             };
 
             using var font = new Font("Arial", fontSize, FontStyle.Bold, GraphicsUnit.Pixel);

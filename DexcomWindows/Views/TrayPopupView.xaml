@@ -14,37 +14,30 @@
         <ScrollViewer x:Name="LoginPanel" Visibility="Visible" 
                       VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled">
-            <StackPanel Padding="60,40" MaxWidth="600" HorizontalAlignment="Center" Spacing="24">
+            <StackPanel Padding="40,24,40,24" MaxWidth="500" HorizontalAlignment="Center" Spacing="12">
                 <!-- App Icon and Title -->
-                <StackPanel HorizontalAlignment="Center" Spacing="16" Margin="0,20,0,20">
-                    <Image Source="ms-appx:///Assets/Icons/app-logo.png" Width="100" Height="100" HorizontalAlignment="Center"/>
-                    <TextBlock Text="Steady Sugar" FontSize="36" FontWeight="Bold" HorizontalAlignment="Center"/>
-                    <TextBlock Text="Sign in with your Dexcom account" 
-                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                               HorizontalAlignment="Center" FontSize="18"/>
+                <StackPanel HorizontalAlignment="Center" Spacing="8">
+                    <Image Source="ms-appx:///Assets/Icons/app-logo.png" Width="80" Height="80" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Steady Sugar" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"/>
                 </StackPanel>
 
                 <!-- Region Picker -->
                 <ComboBox x:Name="ServerComboBox" Header="Region" HorizontalAlignment="Stretch" 
-                          SelectedIndex="0" FontSize="16" Padding="16,12">
+                          SelectedIndex="0" FontSize="14">
                     <ComboBoxItem Content="United States" Tag="US"/>
                     <ComboBoxItem Content="Outside US (International)" Tag="International"/>
                 </ComboBox>
 
                 <!-- Username Field -->
-                <StackPanel Spacing="8">
-                    <TextBlock Text="Username or Email" FontSize="16" FontWeight="SemiBold"/>
-                    <TextBox x:Name="UsernameTextBox"
-                             PlaceholderText="Enter your Dexcom username or email"
-                             FontSize="16"/>
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Username, Email, or Phone" FontSize="14" FontWeight="SemiBold"/>
+                    <TextBox x:Name="UsernameTextBox" PlaceholderText="Dexcom username, email, or phone number" FontSize="14"/>
                 </StackPanel>
 
                 <!-- Password Field -->
-                <StackPanel Spacing="8">
-                    <TextBlock Text="Password" FontSize="16" FontWeight="SemiBold"/>
-                    <PasswordBox x:Name="PasswordBox"
-                                 PlaceholderText="Enter your password"
-                                 FontSize="16"/>
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Password" FontSize="14" FontWeight="SemiBold"/>
+                    <PasswordBox x:Name="PasswordBox" PlaceholderText="Password" FontSize="14" KeyDown="PasswordBox_KeyDown"/>
                 </StackPanel>
 
                 <!-- Error Bar -->
@@ -53,60 +46,49 @@
                 <!-- Sign In Button -->
                 <Button x:Name="LoginButton" Content="Sign In" Style="{StaticResource AccentButtonStyle}"
                         HorizontalAlignment="Stretch" Click="LoginButton_Click"
-                        Padding="0,18" FontSize="20" FontWeight="SemiBold"/>
+                        Padding="0,12" FontSize="16" FontWeight="SemiBold"/>
 
                 <!-- Loading -->
                 <ProgressRing x:Name="LoginProgress" IsActive="False" Visibility="Collapsed" 
-                              HorizontalAlignment="Center" Width="40" Height="40"/>
+                              HorizontalAlignment="Center" Width="32" Height="32"/>
 
-                <!-- Info Box -->
-                <Border Background="#190078D7" CornerRadius="12" Padding="16">
-                    <Grid ColumnSpacing="12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <FontIcon Glyph="&#xE946;" Foreground="#0078D7" FontSize="22" VerticalAlignment="Top" Grid.Column="0"/>
-                        <TextBlock Grid.Column="1" 
-                                   Text="Use the same username/email and password you use in the Dexcom app."
-                                   TextWrapping="Wrap" FontSize="15" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                    </Grid>
+                <!-- Taskbar Tip -->
+                <Border Background="#2634C759" CornerRadius="8" Padding="12,10">
+                    <TextBlock Text="💡 Tip: Right-click taskbar → Taskbar settings → Turn on Steady Sugar to always show."
+                               TextWrapping="Wrap" FontSize="12" Foreground="#34C759"
+                               HorizontalAlignment="Center" TextAlignment="Center"/>
+                </Border>
+
+                <!-- Dexcom Info -->
+                <Border Background="#2634C759" CornerRadius="8" Padding="12,10">
+                    <TextBlock Text="Use the same login as your Dexcom app (username, email, or phone number)."
+                               TextWrapping="Wrap" FontSize="12" Foreground="#34C759"
+                               HorizontalAlignment="Center" TextAlignment="Center"/>
                 </Border>
 
                 <!-- Setup Help Expander -->
-                <Expander Header="Setup Instructions" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
-                    <StackPanel Spacing="12" Padding="8">
-                        <Border Background="#26FF9500" CornerRadius="8" Padding="12">
-                            <StackPanel Spacing="4">
-                                <TextBlock Text="Important: Follower Required" FontSize="15" FontWeight="SemiBold" Foreground="#FF9500"/>
-                                <TextBlock Text="You must have at least one follower who has ACCEPTED the Share invitation for this app to work."
-                                           TextWrapping="Wrap" FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                            </StackPanel>
+                <Expander Header="Setup Instructions" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" FontSize="13">
+                    <StackPanel Spacing="8" Padding="8">
+                        <Border Background="#26FF9500" CornerRadius="6" Padding="10">
+                            <TextBlock Text="⚠️ You must have at least one follower who has ACCEPTED the Share invitation."
+                                       TextWrapping="Wrap" FontSize="12" Foreground="#FF9500"/>
                         </Border>
-                        <TextBlock Text="1. Open the Dexcom G7 app on your phone" FontSize="15"/>
-                        <TextBlock Text="2. Go to Settings → Share" FontSize="15"/>
-                        <TextBlock Text="3. Enable Share" FontSize="15"/>
-                        <TextBlock Text="4. Add at least one follower (can be yourself with a different email)" FontSize="15"/>
-                        <Border Background="#26FF3B30" CornerRadius="8" Padding="12">
-                            <TextBlock Text="5. The follower MUST accept the invitation and set up Dexcom Follow" 
-                                       FontSize="15" FontWeight="SemiBold" Foreground="#FF3B30"/>
-                        </Border>
-                        <TextBlock Text="6. Wait a few minutes, then sign in here" FontSize="15"/>
+                        <TextBlock Text="1. Open Dexcom G7 app → Settings → Share → Enable" FontSize="12"/>
+                        <TextBlock Text="2. Add a follower (can be yourself with different email)" FontSize="12" TextWrapping="Wrap"/>
+                        <TextBlock Text="3. Follower must accept invite and set up Dexcom Follow" FontSize="12" TextWrapping="Wrap" Foreground="#FF3B30" FontWeight="SemiBold"/>
+                        <TextBlock Text="4. Wait a few minutes, then sign in here" FontSize="12"/>
                     </StackPanel>
                 </Expander>
 
                 <!-- Footer -->
-                <Grid Margin="0,20,0,0">
+                <Grid Margin="0,8,0,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <HyperlinkButton Content="Dexcom Support" NavigateUri="https://www.dexcom.com/support" FontSize="15"/>
-                    <HyperlinkButton Grid.Column="1" Content="Contact Developer" NavigateUri="mailto:steadysugar1@gmail.com" FontSize="15" Margin="12,0,0,0"/>
-                    <Button Grid.Column="3" Content="Quit" Click="QuitButton_Click" 
-                            Style="{StaticResource SubtleButtonStyle}" FontSize="15" Padding="20,12"/>
+                    <HyperlinkButton Grid.Column="0" Content="Contact Dev" NavigateUri="mailto:steadysugar1@gmail.com" FontSize="12"/>
+                    <Button Grid.Column="1" Content="Quit" Click="QuitButton_Click" 
+                            Style="{StaticResource SubtleButtonStyle}" FontSize="12" Padding="16,8" HorizontalAlignment="Right"/>
                 </Grid>
             </StackPanel>
         </ScrollViewer>
@@ -345,7 +327,16 @@
                     </Grid>
 
                     <!-- Settings Content -->
-                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <ScrollViewer Grid.Row="1" 
+                                  VerticalScrollBarVisibility="Auto"
+                                  VerticalScrollMode="Enabled"
+                                  HorizontalScrollMode="Disabled"
+                                  IsVerticalScrollChainingEnabled="False"
+                                  IsVerticalRailEnabled="False"
+                                  IsScrollInertiaEnabled="True"
+                                  IsDeferredScrollingEnabled="False"
+                                  ZoomMode="Disabled"
+                                  ManipulationMode="System">
                         <StackPanel Padding="24" Spacing="24">
 
                             <!-- Account Section -->
@@ -379,7 +370,7 @@
                                             <ComboBoxItem Content="Light" Tag="Light"/>
                                             <ComboBoxItem Content="Dark" Tag="Dark"/>
                                             <ComboBoxItem Content="Charcoal" Tag="Charcoal"/>
-                                            <ComboBoxItem Content="Dexcom Green" Tag="DexcomGreen"/>
+                                            <ComboBoxItem Content="CGM Green" Tag="DexcomGreen"/>
                                         </ComboBox>
                                         <ComboBox x:Name="SettingsTimerBarComboBox" Header="Timer Bar Style" HorizontalAlignment="Stretch"
                                                   SelectionChanged="SettingsTimerBar_Changed" FontSize="15">

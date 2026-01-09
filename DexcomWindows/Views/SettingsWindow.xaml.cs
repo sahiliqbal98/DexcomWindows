@@ -54,7 +54,7 @@ public sealed partial class SettingsWindow : Window
             new ThemeItem { Theme = ColorTheme.Dark, Name = "Dark", SwatchColor = Color.FromArgb(255, 26, 26, 26) },
             new ThemeItem { Theme = ColorTheme.Charcoal, Name = "Charcoal", SwatchColor = Color.FromArgb(255, 46, 46, 48) },
             new ThemeItem { Theme = ColorTheme.Rainbow, Name = "Rainbow", SwatchColor = Color.FromArgb(255, 38, 26, 51) },
-            new ThemeItem { Theme = ColorTheme.DexcomGreen, Name = "Dexcom Green", SwatchColor = Color.FromArgb(255, 13, 38, 26) }
+            new ThemeItem { Theme = ColorTheme.DexcomGreen, Name = "CGM Green", SwatchColor = Color.FromArgb(255, 13, 38, 26) }
         };
 
         ThemeListView.ItemsSource = _themeItems;

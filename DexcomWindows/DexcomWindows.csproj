@@ -17,9 +17,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationIcon>Assets\Icons\app-icon.ico</ApplicationIcon>
     <Version>1.0.0</Version>
-    <AssemblyName>DexcomWindows</AssemblyName>
-    <Product>Dexcom Glucose Monitor</Product>
-    <Description>Dexcom glucose monitoring for Windows system tray</Description>
+    <AssemblyName>SteadySugar</AssemblyName>
+    <Product>Steady Sugar</Product>
+    <Description>Steady Sugar - Dexcom glucose monitoring for Windows</Description>
   </PropertyGroup>
 
   <ItemGroup>

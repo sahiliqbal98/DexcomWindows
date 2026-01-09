@@ -10,14 +10,14 @@ namespace DexcomWindows.Services;
 public class SettingsService
 {
     private const string RegistryPath = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run";
-    private const string AppName = "DexcomWindows";
+    private const string AppName = "SteadySugar";
 
     private readonly string _settingsPath;
 
     public SettingsService()
     {
         var appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        var folder = Path.Combine(appData, "DexcomWindows");
+        var folder = Path.Combine(appData, "SteadySugar");
         Directory.CreateDirectory(folder);
         _settingsPath = Path.Combine(folder, "settings.json");
 

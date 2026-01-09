@@ -196,6 +196,18 @@ public partial class App : Application
         }
     }
 
+    private void OpenSettings()
+    {
+        // If popup is not open, open it first
+        if (_popupWindow == null)
+        {
+            ShowPopupWithAnimation();
+        }
+        
+        // Open the settings panel
+        _popupView?.OpenSettingsPanel();
+    }
+
     private void ShowPopupWithAnimation()
     {
         _isPopupAnimating = true;
@@ -404,7 +416,7 @@ public partial class App : Application
                             };
                             break;
                         case "Settings...":
-                            menuItem.Click += (_, _) => TogglePopupWindow(); // Settings is now in the popup
+                            menuItem.Click += (_, _) => OpenSettings();
                             break;
                         case "Quit Dexcom":
                             menuItem.Click += (_, _) => QuitApplication();

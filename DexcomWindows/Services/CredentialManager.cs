@@ -8,9 +8,9 @@ namespace DexcomWindows.Services;
 /// </summary>
 public class CredentialManager
 {
-    private const string CredentialTargetUsername = "DexcomWindows_Username";
-    private const string CredentialTargetAccountId = "DexcomWindows_AccountId";
-    private const string CredentialTargetSession = "DexcomWindows_Session";
+    private const string CredentialTargetUsername = "SteadySugar_Username";
+    private const string CredentialTargetAccountId = "SteadySugar_AccountId";
+    private const string CredentialTargetSession = "SteadySugar_Session";
 
     private readonly SettingsService _settings;
 

@@ -2,6 +2,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using DexcomWindows.Models;
+using System.Diagnostics;
 
 namespace DexcomWindows.Services;
 
@@ -43,6 +44,12 @@ public class DexcomShareAPI
         _httpClient.DefaultRequestHeaders.Accept.Clear();
         _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         _httpClient.DefaultRequestHeaders.Add("User-Agent", "Dexcom Share/3.0.2.11");
+    }
+
+    [Conditional("DEBUG")]
+    private static void DebugLog(string message)
+    {
+        Debug.WriteLine(message);
     }
 
     public void SetServer(Server server) => _server = server;
@@ -113,7 +120,8 @@ public class DexcomShareAPI
             var response = await _httpClient.PostAsync(url, content);
             var responseBody = await response.Content.ReadAsStringAsync();
 
-            System.Diagnostics.Debug.WriteLine($"GetGlucoseReadings response: {response.StatusCode} - {responseBody}");
+            // Do NOT log raw response bodies (can contain sensitive data). Log only status + size in DEBUG.
+            DebugLog($"GetGlucoseReadings response: {(int)response.StatusCode} ({responseBody.Length} bytes)");
 
             if (response.IsSuccessStatusCode)
             {
@@ -128,7 +136,20 @@ public class DexcomShareAPI
                 }
             }
 
-            throw new ServerError((int)response.StatusCode, responseBody);
+            // Try to parse a clean error message instead of returning the full raw payload.
+            var errorMessage = responseBody;
+            try
+            {
+                using var doc = JsonDocument.Parse(responseBody);
+                if (doc.RootElement.ValueKind == JsonValueKind.Object &&
+                    doc.RootElement.TryGetProperty("Message", out var msg))
+                {
+                    errorMessage = msg.GetString() ?? responseBody;
+                }
+            }
+            catch (JsonException) { }
+
+            throw new ServerError((int)response.StatusCode, errorMessage);
         }
         catch (DexcomError)
         {
@@ -165,13 +186,14 @@ public class DexcomShareAPI
             var jsonBody = JsonSerializer.Serialize(body);
             var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
             
-            System.Diagnostics.Debug.WriteLine($"Login request to: {url}");
-            System.Diagnostics.Debug.WriteLine($"Login body: {jsonBody.Replace(body["password"], "***")}");
+            // Avoid logging credentials or raw bodies.
+            DebugLog($"Login request to: {url}");
 
             var response = await _httpClient.PostAsync(url, content);
             var responseBody = await response.Content.ReadAsStringAsync();
 
-            System.Diagnostics.Debug.WriteLine($"Login response: {response.StatusCode} - {responseBody}");
+            // Do NOT log raw response bodies (can include session IDs). Log only status + size in DEBUG.
+            DebugLog($"Login response: {(int)response.StatusCode} ({responseBody.Length} bytes)");
 
             if (response.IsSuccessStatusCode)
             {

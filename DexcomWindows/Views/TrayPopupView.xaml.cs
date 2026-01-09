@@ -463,6 +463,19 @@ public sealed partial class TrayPopupView : UserControl
 
     // ==================== Settings Panel ====================
 
+    /// <summary>
+    /// Opens the settings panel (public for external access)
+    /// </summary>
+    public void OpenSettingsPanel()
+    {
+        if (!_settingsOpen)
+        {
+            _settingsOpen = true;
+            SettingsPanel.Visibility = Visibility.Visible;
+            LoadSettingsValues();
+        }
+    }
+
     private void ToggleSettingsPanel()
     {
         _settingsOpen = !_settingsOpen;
@@ -547,6 +560,14 @@ public sealed partial class TrayPopupView : UserControl
 
     // ==================== Event Handlers ====================
 
+    private void PasswordBox_KeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+    {
+        if (e.Key == Windows.System.VirtualKey.Enter)
+        {
+            LoginButton_Click(LoginButton, new RoutedEventArgs());
+        }
+    }
+
     private async void LoginButton_Click(object sender, RoutedEventArgs e)
     {
         if (_viewModel == null) return;
@@ -582,16 +603,26 @@ public sealed partial class TrayPopupView : UserControl
         {
             await _viewModel.LoginAsync(username, password, server);
 
-            if (!_viewModel.IsAuthenticated && _viewModel.Error != null)
+            if (!_viewModel.IsAuthenticated)
             {
-                LoginErrorBar.Title = _viewModel.Error.Message;
-                LoginErrorBar.Message = _viewModel.Error.RecoverySuggestion;
-                LoginErrorBar.IsOpen = true;
+                if (_viewModel.Error != null)
+                {
+                    LoginErrorBar.Title = _viewModel.Error.Message;
+                    LoginErrorBar.Message = _viewModel.Error.RecoverySuggestion ?? "";
+                    LoginErrorBar.IsOpen = true;
+                }
+                else
+                {
+                    LoginErrorBar.Title = "Login failed";
+                    LoginErrorBar.Message = "Unknown error occurred";
+                    LoginErrorBar.IsOpen = true;
+                }
             }
         }
         catch (Exception ex)
         {
-            LoginErrorBar.Title = ex.Message;
+            LoginErrorBar.Title = "Login error";
+            LoginErrorBar.Message = ex.Message;
             LoginErrorBar.IsOpen = true;
         }
         finally
